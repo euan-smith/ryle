@@ -78,14 +78,14 @@ This is based on the phrase 'The Ghost in the Machine' which originated from 'A 
  
  ```  
  
- ## Tests
+## Tests
  
 ```
    npm test
 ```
- ##Contributing
+## Contributing
  In lieu of a formal styleguide, take care to maintain the existing coding style.
  Add unit tests for any new or changed functionality. Lint and test your code.
 
-##Release History
+## Release History
 none yet!
