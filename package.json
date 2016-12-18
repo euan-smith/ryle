@@ -1,0 +1,26 @@
+{
+  "name": "ryle",
+  "version": "0.0.1",
+  "description": "A hierarchical state machine",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --reporter spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/zakalwe314/ryle.git"
+  },
+  "keywords": [
+    "fsm"
+  ],
+  "author": "Euan Smith <euan1971@yahoo.co.uk> (https://github.com/zakalwe314)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zakalwe314/ryle/issues"
+  },
+  "homepage": "https://github.com/zakalwe314/ryle#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
+  }
+}
