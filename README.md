@@ -14,9 +14,6 @@ Yes, I know, there are a lot.  This has a lot of the features of the others, plu
 - Reusable
   - A state machine is composed and then several instances of it can be run.
   - Composed machines can be used to create library methods and the user does not need to know that it is a state machine under the hood.
-- Extensible
-  - A given state machine can be extended, adding and overriding existing states.
-  - Similarly, if desired, a state machine can be declared to be not extensible
 - State machines can be composed
   - An existing state machine can be nested within another.
   - Virtual states can be defined which are then instantiated by a parent machine.
@@ -32,49 +29,26 @@ This is based on the phrase 'The Ghost in the Machine' which originated from 'A 
 ##Usage
   
 ```
-  var Ryle=require('ryle');
+  var ryle=require('ryle');
   
-  //define the context, the data object with the state machine can modify 
-  //and the public interface to the machine.
-  //A constructor is used so that a new context is made per instance. 
-  function Context(start){
-    this.seconds=start || 10;
-  }
-  
-  //now define the state machine
-  var fsm={
+  //define a state machine
+  var countdown=ryle({
   
     //the start must be a getter function returning the initial promise
     get _start(){return this.tick},
     
     //this is the main state.  It transitions to itself every second and to done when complete
     tick(context){
-      --context.seconds;
-      return Ryle.on(!context.seconds,this.done).onTimeout(1000, this.tick);
+      console.log(context.value);
+      return ryle.on(!context.value,this.done).onTimeout(1000, this.tick).onExit(function(){--context.value});
     },
     done(){
-      return Ryle.exit();
+      return ryle.exit();
     }
-  }
+  });
 
-  //add a public method to the interface
-  Context.prototype={
-    onTick(fn){
-      fsm.tick.onEnter(this,fn);
-    }
-  }
- 
-  //Define the machine
-  var Stopwatch = Ryle.extend({Context, fsm});
-  
   //Now to use the state machine
-  
-  //Create an instance
-  var countdown = new Stopwatch(60);
-  //Listen for the tick
-  countdown.onTick(()=>console.log(countdown.seconds));
-  //And react when the state machine is done
-  countdown.then(()=>console.log('done!'));
+  countdown(10).then(()=>console.log('Boom!'));
  
 ```  
  
