@@ -31,52 +31,52 @@ This is based on the phrase 'The Ghost in the Machine' which originated from 'A 
 
 ##Usage
   
- ```
- var Ryle=require('ryle');
- 
- //define the context, the data object with the state machine can modify 
- //and the public interface to the machine.
- //A constructor is used so that a new context is made per instance. 
- function Context(start){
-   this.seconds=start || 10;
- }
- 
- //add a public method
- Context.prototype={
-   onTick(fn){
-     this.$fsm.tick.on(fn);
-   }
- }
- 
- //now define the state machine
- var fsm={
- 
-  //the start must be a getter function returning the initial promise
-  get _start(){return this.tick},
+```
+  var Ryle=require('ryle');
   
-  //this is the main state.  It transitions to itself every second and to done when complete
-  tick(context){
-    --context.seconds;
-    return Ryle.on(!context.seconds,this.done).onTimeout(1000, this.tick);
-  },
-  done(){
-    return Ryle.exit();
+  //define the context, the data object with the state machine can modify 
+  //and the public interface to the machine.
+  //A constructor is used so that a new context is made per instance. 
+  function Context(start){
+    this.seconds=start || 10;
   }
- }
+  
+  //now define the state machine
+  var fsm={
+  
+    //the start must be a getter function returning the initial promise
+    get _start(){return this.tick},
+    
+    //this is the main state.  It transitions to itself every second and to done when complete
+    tick(context){
+      --context.seconds;
+      return Ryle.on(!context.seconds,this.done).onTimeout(1000, this.tick);
+    },
+    done(){
+      return Ryle.exit();
+    }
+  }
+
+  //add a public method to the interface
+  Context.prototype={
+    onTick(fn){
+      fsm.tick.onEnter(this,fn);
+    }
+  }
  
- //Define the machine
- var Stopwatch = Ryle.extend({Context, fsm});
+  //Define the machine
+  var Stopwatch = Ryle.extend({Context, fsm});
+  
+  //Now to use the state machine
+  
+  //Create an instance
+  var countdown = new Stopwatch(60);
+  //Listen for the tick
+  countdown.onTick(()=>console.log(countdown.seconds));
+  //And react when the state machine is done
+  countdown.then(()=>console.log('done!'));
  
- //Now to use the state machine
- 
- //Create an instance
- var countdown = new Stopwatch(60);
- //Listen for the tick
- countdown.onTick(()=>console.log(countdown.seconds));
- //And react when the state machine is done
- countdown.then(()=>console.log('done!'));
- 
- ```  
+```  
  
 ## Tests
  
