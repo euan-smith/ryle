@@ -18,7 +18,8 @@ Above all I found many of the other fsm libraries required machine definition co
 The easier code is to read then in general it is simpler to maintain and for others to follow.  I've tried to make resultant state definition code to be as readable as possible.
 
 ##Why Ryle?
-This is based on the phrase 'The Ghost in the Machine' which originated from 'A Concept of Mind' by Gilbert Ryle, a British Philosopher.   
+I wanted to base the name on the phrase ['Ghost in the Machine'](https://en.wikipedia.org/wiki/Ghost_in_the_machine) which originated from the book ['The Concept of Mind'](https://en.wikipedia.org/wiki/The_Concept_of_Mind) by Gilbert Ryle, a British Philosopher.
+   Ghost was already taken.
 ## Installation
   npm install ryle --save
 
