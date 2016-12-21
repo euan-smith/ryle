@@ -4,14 +4,21 @@
   "description": "A hierarchical state machine",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --reporter spec"
+    "test": "mocha --reporter spec",
+	"uxf":"umlet -action=convert -format=png -filename=examples/*.uxf"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/zakalwe314/ryle.git"
   },
   "keywords": [
-    "fsm"
+    "fsm",
+	"fsa",
+	"finite",
+	"state",
+	"machine",
+	"hierarchical",
+	"uml"
   ],
   "author": "Euan Smith <euan1971@yahoo.co.uk> (https://github.com/zakalwe314)",
   "license": "MIT",
