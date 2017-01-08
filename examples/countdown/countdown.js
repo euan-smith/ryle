@@ -2,7 +2,7 @@
  * Created by euans on 19/12/2016.
  */
 
-var ryle=require('.');
+var ryle=require('../../');
 
 //define a state machine
 var countdown=ryle({
@@ -23,5 +23,4 @@ var countdown=ryle({
   }
 });
 
-//Now to use the state machine
-countdown(10).then(function(){console.log('Boom!')});
+module.exports=countdown;

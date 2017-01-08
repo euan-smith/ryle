@@ -167,16 +167,6 @@ const inList = _Symbol('__fsm_onIn');
 const activeState = _Symbol('__fsm_active_state');
 
 
-//a helper to ensure an uncaught error in a promise is thrown.
-function rethrow(e) {
-  //setTimeout(function () {
-  //    throw e
-  //}, 0)
-  console.log('Uncaught error in state machine: ' , e);
-  console.trace();
-  throw e;
-}
-
 function isChildOf(fsm, stateId) {
   return fsm[FSM_CHILDREN].indexOf(stateId) !== -1;
 }
@@ -250,7 +240,8 @@ function runListeners(list, msg, state, context) {
     try {
       fn(msg + '.' + state._origName, context);
     } catch (e) {
-      rethrow(e);
+      console.error('Ryle: error caught from callback function.');
+      console.error(e);
     }
   });
 }
@@ -297,7 +288,7 @@ function runFSM(machine, state, data, context, transferObj) {
       runListeners(exitList, 'exit', machine, context);
       //return original result
       return rslt;
-    }).catch(rethrow);
+    });
 }
 
 function hasData(r) {
@@ -457,7 +448,7 @@ FsmObj.prototype = {
     if (len === 0) return self;
     //The only case for a single argument is if it is a promise
     if (len === 1) {
-      if (args[0] instanceof Promise) {
+      if (args[0].then) {
         self._trans.push(args[0]);
         return self;
       } else {
@@ -474,14 +465,14 @@ FsmObj.prototype = {
       return self;
     }
     //a promise and a transition
-    if (len === 2 && args[0] instanceof Promise) {
+    if (len === 2 && args[0].then) {
       self._trans.push(args[0].then(function (r) {
         return {_state: args[1], _data: r};
       }));
       return self;
     }
     //a promise and two transitions, one for success and one for failure
-    if (len === 3 && args[0] instanceof Promise) {
+    if (len === 3 && args[0].then) {
       self._trans.push(args[0].then(
         function (r) {
           return {_state: args[1], _data: r};

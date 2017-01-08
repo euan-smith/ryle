@@ -8,4 +8,11 @@ var ryle=require('./src/fsm-old.js');
 //quick fix for an exit function
 ryle.exit=function(v){return v===undefined?{}:v};
 
+
+//add in the actions and bind them
+var actionLib=require('./src/action');
+ryle.action=actionLib.action;
+ryle.actions=actionLib.actions;
+require('./src/action-binding');
+
 module.exports=ryle;

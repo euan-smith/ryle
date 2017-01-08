@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter spec",
-	"uxf":"umlet -action=convert -format=png -filename=examples/*.uxf"
+    "uxf": "umlet -action=convert -format=png -filename=examples/*.uxf"
   },
   "repository": {
     "type": "git",
@@ -13,12 +13,12 @@
   },
   "keywords": [
     "fsm",
-	"fsa",
-	"finite",
-	"state",
-	"machine",
-	"hierarchical",
-	"uml"
+    "fsa",
+    "finite",
+    "state",
+    "machine",
+    "hierarchical",
+    "uml"
   ],
   "author": "Euan Smith <euan1971@yahoo.co.uk> (https://github.com/zakalwe314)",
   "license": "MIT",
@@ -29,6 +29,8 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
+    "express": "^4.14.0",
+    "http-as-promised": "^1.1.0",
     "mocha": "^3.2.0"
   }
 }
