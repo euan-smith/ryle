@@ -4,7 +4,10 @@
 
 const ryle=require('../../');
 const $http=require('http-as-promised');
+
+//the base url of the rest service
 const url='http://localhost:3000';
+//ensure the response is parsed as json and prevent the 303 causing an auto redirect
 const opts={json:true, followRedirect:false};
 
 var getJob=ryle({
