@@ -4,8 +4,8 @@
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>272</x>
-      <y>240</y>
+      <x>352</x>
+      <y>328</y>
       <w>96</w>
       <h>72</h>
     </coordinates>
@@ -18,177 +18,42 @@ valign=top
     <additional_attributes/>
   </element>
   <element>
-    <id>UMLSpecialState</id>
-    <coordinates>
-      <x>288</x>
-      <y>200</y>
-      <w>16</w>
-      <h>16</h>
-    </coordinates>
-    <panel_attributes>type=initial</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>288</x>
-      <y>208</y>
-      <w>24</w>
-      <h>48</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;40.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>464</x>
-      <y>200</y>
-      <w>680</w>
-      <h>56</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-[response invalid]</panel_attributes>
-    <additional_attributes>10.0;50.0;10.0;10.0;830.0;10.0</additional_attributes>
-  </element>
-  <element>
     <id>UMLState</id>
     <coordinates>
-      <x>416</x>
-      <y>240</y>
+      <x>512</x>
+      <y>328</y>
       <w>112</w>
       <h>72</h>
     </coordinates>
-    <panel_attributes>checkPost
+    <panel_attributes>checkJob
 --
-store job
+store body
 check statusCode
-
 valign=top
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
-    <id>UMLSpecialState</id>
-    <coordinates>
-      <x>1128</x>
-      <y>200</y>
-      <w>16</w>
-      <h>16</h>
-    </coordinates>
-    <panel_attributes>type=final</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>336</x>
-      <y>200</y>
-      <w>808</w>
-      <h>56</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-error</panel_attributes>
-    <additional_attributes>10.0;50.0;10.0;10.0;990.0;10.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>360</x>
-      <y>256</y>
-      <w>72</w>
-      <h>32</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-OK</panel_attributes>
-    <additional_attributes>10.0;20.0;70.0;20.0</additional_attributes>
-  </element>
-  <element>
     <id>UMLState</id>
     <coordinates>
-      <x>576</x>
-      <y>240</y>
+      <x>512</x>
+      <y>216</y>
       <w>112</w>
       <h>72</h>
     </coordinates>
     <panel_attributes>getJob
 --
-GET job location
+GET job
 
 valign=top
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>520</x>
-      <y>256</y>
-      <w>72</w>
-      <h>32</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-[else]</panel_attributes>
-    <additional_attributes>10.0;20.0;70.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>632</x>
-      <y>200</y>
-      <w>512</w>
-      <h>56</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-error</panel_attributes>
-    <additional_attributes>10.0;50.0;10.0;10.0;620.0;10.0</additional_attributes>
-  </element>
-  <element>
     <id>UMLState</id>
     <coordinates>
-      <x>760</x>
-      <y>240</y>
-      <w>128</w>
-      <h>72</h>
-    </coordinates>
-    <panel_attributes>checkJob
---
-check statusCode
-if redirect store location 
-valign=top
-</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>680</x>
-      <y>248</y>
-      <w>96</w>
-      <h>32</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-OK</panel_attributes>
-    <additional_attributes>10.0;20.0;100.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>680</x>
-      <y>272</y>
-      <w>96</w>
-      <h>40</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-250ms
-timeout</panel_attributes>
-    <additional_attributes>100.0;20.0;10.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>UMLState</id>
-    <coordinates>
-      <x>944</x>
-      <y>240</y>
+      <x>696</x>
+      <y>328</y>
       <w>96</w>
       <h>72</h>
     </coordinates>
@@ -200,65 +65,97 @@ valign=top
     <additional_attributes/>
   </element>
   <element>
-    <id>Relation</id>
+    <id>UMLSpecialState</id>
     <coordinates>
-      <x>880</x>
-      <y>256</y>
-      <w>80</w>
-      <h>32</h>
+      <x>392</x>
+      <y>264</y>
+      <w>16</w>
+      <h>16</h>
     </coordinates>
-    <panel_attributes>lt=-&gt;
-[redirect]</panel_attributes>
-    <additional_attributes>10.0;20.0;80.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>984</x>
-      <y>200</y>
-      <w>160</w>
-      <h>56</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-error</panel_attributes>
-    <additional_attributes>10.0;50.0;10.0;10.0;180.0;10.0</additional_attributes>
-  </element>
-  <element>
-    <id>UMLState</id>
-    <coordinates>
-      <x>1088</x>
-      <y>240</y>
-      <w>96</w>
-      <h>72</h>
-    </coordinates>
-    <panel_attributes>gotResult
---
-exit with result
-valign=top
-</panel_attributes>
+    <panel_attributes>type=initial</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1032</x>
-      <y>256</y>
-      <w>72</w>
-      <h>32</h>
+      <x>392</x>
+      <y>272</y>
+      <w>24</w>
+      <h>72</h>
     </coordinates>
-    <panel_attributes>lt=-&gt;
-OK</panel_attributes>
-    <additional_attributes>10.0;20.0;70.0;20.0</additional_attributes>
+    <panel_attributes>lt=-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1128</x>
-      <y>208</y>
-      <w>24</w>
-      <h>48</h>
+      <x>440</x>
+      <y>344</y>
+      <w>88</w>
+      <h>32</h>
     </coordinates>
-    <panel_attributes>lt=-&gt;</panel_attributes>
-    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+    <panel_attributes>lt=-&gt;
+OK</panel_attributes>
+    <additional_attributes>10.0;20.0;90.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>616</x>
+      <y>344</y>
+      <w>96</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+[complete]</panel_attributes>
+    <additional_attributes>10.0;20.0;100.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>584</x>
+      <y>280</y>
+      <w>56</w>
+      <h>64</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+250ms
+timeout</panel_attributes>
+    <additional_attributes>10.0;60.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>536</x>
+      <y>280</y>
+      <w>40</w>
+      <h>64</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+OK</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>736</x>
+      <y>272</y>
+      <w>40</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+OK</panel_attributes>
+    <additional_attributes>10.0;70.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>736</x>
+      <y>264</y>
+      <w>16</w>
+      <h>16</h>
+    </coordinates>
+    <panel_attributes>type=final</panel_attributes>
+    <additional_attributes/>
   </element>
 </diagram>
