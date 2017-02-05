@@ -2,8 +2,8 @@
  * Created by EuanSmith on 18/04/2016.
  */
 
-var GUID = require('./guid');
-var extend = require('./objects').extend;
+var GUID = require('../src/guid');
+var extend = require('../src/objects').extend;
 var addListener = GUID.addListener;
 var removeListener = GUID.removeListener;
 
