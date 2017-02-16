@@ -4,7 +4,7 @@
 
 const rId = require('./reference-id');
 
-class RefStore{
+module.exports = class{
   /**
    * Create an object reference store, optionally for a specified object type.
    * @param {Constructor} type The constructor defining the allowed object type (e.g. Function)

@@ -6,6 +6,7 @@ const service=require('./longRestService');
 
 const longRest=require('./longRest');
 
+//to show the reuse value
 var proms=[];
 for (var i=0; i<10; i++){
   proms.push(function(i){

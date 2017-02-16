@@ -33,5 +33,9 @@
     "http-as-promised": "^1.1.0",
     "mocha": "^3.2.0",
     "ord": "^0.1.1"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.7",
+    "mini-signals": "^1.1.1"
   }
 }

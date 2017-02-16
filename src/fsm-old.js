@@ -604,9 +604,7 @@ function using(context) {
 
 function fsm(def, name) {
   //check if valid
-  if (!(typeof def === "object" && def.hasOwnProperty("_start"))) throw new Error('fsm(' + name + '): invalid state machine definition');
-  //add a cancelled reason - just use an empty object
-  fsm.cancelled = {};
+  if (!(typeof def === "object" && def.hasOwnProperty("_start"))) throw new Error('Ryle: invalid state machine definition');
   if (!name) name = "";
   var target = function sm(context) {
     if (!(context instanceof Object)){
@@ -633,6 +631,9 @@ function fsm(def, name) {
     rtn.cancel = function () {
       cancel(fsm.cancelled);
     };
+    //references to the context and state machine
+    rtn.context = context;
+    rtn.machine = target;
     //and return the promise
     return rtn;
   };
@@ -680,6 +681,7 @@ function fsm(def, name) {
   descendants.push.apply(descendants, children);
   return target;
 }
+Object.defineProperty(fsm, 'cancelled', {value:{}, writable:false, enumerable:false});
 fsm.fn = FsmObj.prototype;
 function fsmAttach(n) {
   return function () {
