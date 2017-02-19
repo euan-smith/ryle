@@ -112,7 +112,7 @@ function isAction(fn){
 function register(ryle) {
   ryle.defineOn(
     function (action, resolve) {
-      action.on(resolve);
+      action.using(resolve);
       return function () {
         action.clear()
       };
@@ -120,7 +120,7 @@ function register(ryle) {
     function (action) {
       return arguments.length === 2 && action instanceof Action;
     },
-    [Action.create()]
+    [create()]
   );
 }
 

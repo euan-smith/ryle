@@ -34,6 +34,16 @@ class Prop {
   }
 
   /**
+   * Create a new instance of a property each time.
+   * @param {function} getter - a function which returns a new object
+   */
+  create(getter){
+    if (typeof getter !== 'function') throw new TypeError('Parameter must be a function');
+    Object.defineProperty(this, 'value', {get:getter});
+    return this;
+  }
+
+  /**
    * make a property not writable
    * @returns {Prop}
    */
@@ -57,3 +67,9 @@ class Prop {
  * @param val
  */
 exports.prop = val => new Prop(val);
+
+exports.defineProperties = (obj, props) => {
+  for(let p of Object.keys(props)){
+    Object.defineProperty(obj, p, Object.assign({},props[p]));
+  }
+};

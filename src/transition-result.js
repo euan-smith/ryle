@@ -13,6 +13,12 @@ class TransitionResult {
   static addState(state){
     return payload=>new TransitionResult(state, payload);
   }
+  static exit(payload){
+    return new TransitionResult(null, payload);
+  }
+  static entry(state){
+    return new TransitionResult(state);
+  }
 }
 
-module.exports={TransitionResult};
+module.exports=TransitionResult;

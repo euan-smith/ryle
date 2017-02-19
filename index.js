@@ -11,8 +11,7 @@ ryle.exit=function(v){return v===undefined?{}:v};
 
 //add in the actions and bind them
 var actionLib=require('./src/action');
-ryle.action=actionLib.action;
-ryle.actions=actionLib.actions;
-require('./src/action-binding');
+ryle.action=actionLib.create;
+actionLib.register(ryle);
 
 module.exports=ryle;

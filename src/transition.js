@@ -2,7 +2,7 @@
  * Created by euans on 14/02/2017.
  */
 const Promise = require('bluebird');
-const {TransitionResult} = require('./transition-result');
+const TransitionResult = require('./transition-result');
 const addState = TransitionResult.addState;
 const {prop} = require('./props');
 

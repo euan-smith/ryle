@@ -3,9 +3,11 @@
  */
 
 const {create:createColl, isCollection} = require('./transition-collection');
-const {addResult, isResult} = require('./transition-result');
+const {addState, isResult} = require('./transition-result');
 const Promise = require('bluebird');
-let isState, isMachine;
+const {isState} = require('./state');
+const {isMachine} = require('./machine');
+console.log(isMachine);
 
 function runFsm(machine, transition, context, trans){
   let coll = machine.$superState ? machine.$superState() : null;
@@ -24,10 +26,10 @@ function runState(machine, transition, context, trans){
   let prom, state = transition.state;
   if (machine._hasChild(state)){
     if (isMachine(state)) {
-      prom = runFsm(state, transition, context, trans);
+      prom = Promise.resolve(runFsm(state, transition, context, trans));
     } else {
       const rtn = state.call(machine, context, transition.payload);
-      if (isState(rtn)) prom = Promise.resolve().then(addResult(rtn));
+      if (isState(rtn)) prom = Promise.resolve().then(addState(rtn));
       else if (isResult(rtn)) prom = Promise.resolve(rtn);
       else if (isCollection(rtn)) prom = rtn.addTransfer(trans).resolve().then(r=>{rtn.cleanUp(); return r;});
       else if (rtn == null) prom = trans.resolve();
@@ -39,4 +41,6 @@ function runState(machine, transition, context, trans){
   }
   return prom.then(r=>runState(machine, r, context, trans));
 }
+
+module.exports = {runFsm, runState};
 
