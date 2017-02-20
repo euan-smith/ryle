@@ -3,54 +3,91 @@
  */
 
 
-var a = require('../src/action');
-require('chai').should();
+var action = require('../src/action');
+const {expect} = require('chai');
 
 describe('action', function () {
-    it('creates an action which can be subscribed to and triggered', function (done) {
-        var act = a.action();
-        var cnt = 0;
-        var fn1=function () {
-            cnt++;
-        };
-        var fn2=function () {
-            cnt+=10;
-        };
-        act.on(fn1);
-        act.on(fn2);
-        act();
-        cnt.should.equal(11);
-        act.off(fn1);
-        act();
-        cnt.should.equal(21);
-        act.off();
-        act();
-        cnt.should.equal(21);
-        act.on(function(a,b,c){
-            a.should.equal(1);
-            b.should.equal(2);
-            c.should.equal('test');
-            this.test.should.equal('this');
-            done();
-        });
-        act.call({test:'this'},1,2,'test');
+  describe('create', function(){
+    it('creates an action which can be subscribed to and asynchronously triggered', function (done) {
+      let test=false;
+      action.create()
+        .using(()=>{
+          if (!test) done(new Error('test should be true!'));
+          done();
+        })
+        ();
+      test=true;
     });
-    it('creates an object of actions constructed from an array',function(){
-        var def=['one','two'];
-        var acts= a.actions(def);
-        var cnt=0;
-        acts.should.have.all.keys(def);
-        var fn1=function () {
-            cnt++;
-        };
-        var fn2=function () {
-            cnt+=10;
-        };
-        acts.one.on(fn1);
-        acts.two.on(fn2);
-        acts.one();
-        cnt.should.equal(1);
-        acts.two();
-        cnt.should.equal(11);
+    it('creates an action which reports if it is active or not', function(){
+      const act = action.create();
+
+    });
+    it('creates an action which can be called synchronously or asynchronously', function (done) {
+      let cnt=0;
+      action.create(false)
+        .using(v=>cnt+=v)
+        (1);
+      expect(cnt).to.equal(1);
+      action.create(true)
+        .using(v=>cnt+=v)
+        (2);
+      expect(cnt).to.equal(1);
+      action.create(true)
+        .using(()=>{
+          try{
+            expect(cnt).to.equal(3);
+          } catch(e){
+            done(e)
+          }
+          done();
+        })();
+    });
+    it('creates an action which can be unsubscribed from', function (done) {
+      action.create(false)
+        .using(()=> done(new Error('should not have been triggered')))
+        .clear()
+        ();
+      action.create(true)
+        .using(()=> done(new Error('should not have been triggered')))
+        .clear()
+        ();
+      action.create(true).using(done)();
+    });
+    it('creates an action which throws an error if if something other than a function is supplied', function(done){
+      try{
+        action.create().using({});
+      } catch(e){
+        expect(e).to.be.an.instanceOf(TypeError);
+        done();
+      }
+      throw new Error('Error was not thrown as expected')
+    });
+  });
+  describe('createOn',function(){
+    it('creates an object of actions constructed from an array', function () {
+      var def = ['one', 'two'];
+      var target={'three':3};
+      var acts = action.createOn(target, def, false);
+      expect(acts).to.equal(target);
+      expect(acts).to.have.all.keys(def.concat('three'));
+      var cnt = 0;
+      acts.one.using(v=>cnt += v);
+      acts.two.using(v=>cnt += 2 * v);
+      acts.one(3);
+      expect(cnt).to.equal(3);
+      acts.two(3);
+      expect(cnt).to.equal(9);
+    });
+    it('creates a new object if one is not supplied', function(){
+      var def = ['one', 'two'];
+      var acts = action.createOn(undefined, def, false);
+      expect(acts).to.have.all.keys(def);
     })
+  });
+  describe('isAction', function(){
+    it('tests if an object is an action or not', function(){
+      expect(action.isAction({})).to.equal(false);
+      expect(action.isAction(action.create())).to.equal(true);
+    })
+  })
 });

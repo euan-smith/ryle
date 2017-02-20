@@ -5,7 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter spec",
+    "coverage": "nyc mocha test/**/*.js",
     "uxf": "umlet -action=convert -format=png -filename=examples/*.uxf"
+  },
+  "nyc": {
+    "reporter": [
+      "text",
+      "html"
+    ]
   },
   "repository": {
     "type": "git",
@@ -32,6 +39,7 @@
     "express": "^4.14.0",
     "http-as-promised": "^1.1.0",
     "mocha": "^3.2.0",
+    "nyc": "^10.1.2",
     "ord": "^0.1.1"
   },
   "dependencies": {

@@ -53,7 +53,7 @@ class Action extends Function {
    * @param dat
    * @returns {Action}
    */
-  triggerAsync(dat){
+  triggerAsync(dat) {
     if (this.isActive) {
       Promise.resolve(dat).then(this._cb);
     }
@@ -73,8 +73,8 @@ const actionProps = {
  */
 function create(async = true) {
   const action = async ?
-    d => action.trigger(d) :
-    d => action.triggerAsync(d);
+    d => action.triggerAsync(d) :
+    d => action.trigger(d);
   Object.setPrototypeOf(action, Action.prototype);
   Object.defineProperties(action, actionProps);
   return action;
@@ -101,7 +101,7 @@ function createOn(target, list, async) {
  * @param fn
  * @returns {boolean}
  */
-function isAction(fn){
+function isAction(fn) {
   return fn instanceof Action;
 }
 
@@ -109,23 +109,23 @@ function isAction(fn){
  * Registers the action type for use in Ryle
  * @param ryle - the Ryle object
  */
-function register(ryle) {
-  ryle.defineOn(
-    function (action, resolve) {
-      action.using(resolve);
-      return function () {
-        action.clear()
-      };
-    },
-    function (action) {
-      return arguments.length === 2 && action instanceof Action;
-    },
-    [create()]
-  );
-}
+// function register(ryle) {
+//   ryle.defineOn(
+//     function (action, resolve) {
+//       action.using(resolve);
+//       return function () {
+//         action.clear()
+//       };
+//     },
+//     function (action) {
+//       return arguments.length === 2 && action instanceof Action;
+//     },
+//     [create()]
+//   );
+// }
 
 /**
  * @module
  * @type {{create: create, createOn: createOn, register: register}}
  */
-module.exports = {create, createOn, register};
+module.exports = {create, createOn, isAction};

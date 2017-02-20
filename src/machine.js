@@ -39,6 +39,7 @@ exports.makeMachine = function(obj, parent, machine){
     Object.setPrototypeOf(machine, Machine.prototype);
   }
   console.log(machine);
+  //todo: Check if this special define props is needed
   defineProperties(machine, machineProps);
   machine._parent = parent;
 

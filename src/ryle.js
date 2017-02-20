@@ -7,6 +7,7 @@ const TransitionResult = require('./transition-result');
 const {onExit, onTimeout, on, registerEvent} = require('./transition-collection');
 
 function ryle(obj){
+  //todo: implement registration
   //todo: add cancel
   //todo: add abstract states
   //todo: add exit transition

@@ -8,6 +8,7 @@ const {prop} = require('./props');
 const {onTimeout, onExit, onPromise, onEvent} = require('./transition');
 
 const definitions = [];
+const samples = [];
 
 class TransitionCollection {
   constructor() {
@@ -87,14 +88,18 @@ exports.onTimeout = (delay, state) => new TransitionCollection().onTimeout(delay
 exports.on = (trigger, stateOnOK, stateOnFail) => new TransitionCollection().on(trigger, stateOnOK, stateOnFail);
 
 exports.registerEvent = (binderFunc, sample) => {
-  let i = definitions.length;
+  if (!(sample instanceof Array)) sample = [sample];
+  for (let a of sample) if (!binderFunc(s)) throw new Error('Registration does not react to its own sample(s)');
+
+  let i = samples.length;
   //The tests are done in reverse order, so it is OK for another test to react to this sample
   // but it is not OK for this test to react to an existing sample
   while (i--) {
-    if (binderFunc(definitions[i][1])) throw new Error('This registration reacts to an existing test sample - try being more specific.')
+    if (binderFunc(samples[i])) throw new Error('This registration reacts to an existing test sample - try being more specific.')
   }
 
-  definitions.push([binderFunc, sample]);
+  definitions.push(binderFunc);
+  for (let s of sample)samples.push(s);
 };
 
 /*
