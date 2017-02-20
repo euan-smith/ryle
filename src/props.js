@@ -6,74 +6,6 @@
  * @module props
  */
 
-/**
- * @class
- */
-class Prop {
-
-  /**
-   * initiates a property descriptor with a value with it writable, enumerable but not reconfigurable
-   * @constructor
-   * @param val the initial value
-   */
-  constructor(val) {
-    this.writable = true;
-    this.enumerable = true;
-    this.configurable = false;
-    this.value = val;
-    return this;
-  }
-
-  /**
-   * make a property not enumerable
-   * @returns {Prop}
-   */
-  hide() {
-    this.enumerable = false;
-    return this;
-  }
-
-  /**
-   * Create a new instance of a property each time.
-   * @param {function} getter - a function which returns a new object
-   */
-  create(getter) {
-    if (typeof getter !== 'function') throw new TypeError('Parameter must be a function');
-    Object.defineProperty(this, 'value', {get: getter});
-    return this;
-  }
-
-  /**
-   * make a property not writable
-   * @returns {Prop}
-   */
-  fix() {
-    this.writable = false;
-    return this;
-  }
-
-  /**
-   * make a property configurable
-   * @returns {Prop}
-   */
-  thaw() {
-    this.configurable = true;
-    return this;
-  }
-}
-
-/**
- * initiates a property descriptor with a value with it writable, enumerable but not reconfigurable
- * @param val
- */
-//exports.prop = val => new Prop(val);
-
-// exports.defineProperties = (obj, props) => {
-//   for(let p of Object.keys(props)){
-//     Object.defineProperty(obj, p, Object.assign({},props[p]));
-//   }
-// };
-
 
 const defaultProp = {
   writable: true,
@@ -82,23 +14,8 @@ const defaultProp = {
   value: undefined
 };
 
-function makeTarget(){
-  const target = function (val, isMethod = false) {
-    var rtn = new Prop2(target);
-    if (arguments.length > 0) {
-      if (typeof val === 'function' && !isMethod) {
-        Object.defineProperty(rtn, 'value', {get: val});
-      } else {
-        Object.defineProperty(rtn, 'value', {value: val});
-      }
-    }
-    return rtn;
-  };
-  return target;
-}
-
-class Prop2 extends Function {
-  static makeRoot(props){
+class Prop extends Function {
+  static makeRoot(props) {
     const rtn = makeTarget();
     for (let k of Object.keys(props)) {
       const d = Object.getOwnPropertyDescriptor(props, k);
@@ -109,13 +26,29 @@ class Prop2 extends Function {
     return rtn;
   }
 
-  static create(props){
-    const rtn = makeTarget();
-    Object.setPrototypeOf(rtn, Prop2.prototype);
+  static create(props) {
+    const rtn = Prop.makeTarget();
+    Object.setPrototypeOf(rtn, Prop.prototype);
     Object.assign(rtn, props);
     Object.defineProperty(rtn, 'value', Object.getOwnPropertyDescriptor(props, 'value'));
     return rtn;
   }
+
+  static makeTarget() {
+    const target = function (val, isMethod = false) {
+      var rtn = Prop.create(target);
+      if (arguments.length > 0) {
+        if (typeof val === 'function' && !isMethod) {
+          Object.defineProperty(rtn, 'value', {get: val});
+        } else {
+          Object.defineProperty(rtn, 'value', {value: val});
+        }
+      }
+      return rtn;
+    };
+    return target;
+  }
+
 
   get hidden() {
     this.enumerable = false;
@@ -148,4 +81,4 @@ class Prop2 extends Function {
   }
 }
 
-exports.prop = new Prop2(defaultProp, true);
+exports.prop = Prop.makeRoot(defaultProp);
