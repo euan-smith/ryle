@@ -4,7 +4,7 @@
 
 "use strict";
 const Promise = require('bluebird');
-const {prop} = require('./props');
+const {prop} = require('./descriptors');
 
 /**
  * A function which can be listened to.  This is intended to be used as part of an interface, but where
@@ -62,7 +62,7 @@ class Action extends Function {
 }
 
 const actionProps = {
-  _cb: prop().hide(),
+  _cb: prop().hidden,
   isActive: prop(false)
 };
 

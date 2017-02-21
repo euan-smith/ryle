@@ -16,7 +16,7 @@ const defaultProp = {
 
 class Prop extends Function {
   static makeRoot(props) {
-    const rtn = makeTarget();
+    const rtn = Prop.makeTarget();
     for (let k of Object.keys(props)) {
       const d = Object.getOwnPropertyDescriptor(props, k);
       d.configurable = false;
@@ -30,7 +30,12 @@ class Prop extends Function {
     const rtn = Prop.makeTarget();
     Object.setPrototypeOf(rtn, Prop.prototype);
     Object.assign(rtn, props);
-    Object.defineProperty(rtn, 'value', Object.getOwnPropertyDescriptor(props, 'value'));
+    Object.defineProperty(rtn, 'value',
+      Object.assign(
+        Object.getOwnPropertyDescriptor(props, 'value'),
+        {configurable:true}
+        )
+    );
     return rtn;
   }
 
