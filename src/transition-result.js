@@ -16,8 +16,8 @@ class TransitionResult {
   static exit(payload){
     return new TransitionResult(null, payload);
   }
-  static entry(state){
-    return new TransitionResult(state);
+  static create(state, payload){
+    return new TransitionResult(state, payload);
   }
 }
 
