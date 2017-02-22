@@ -4,7 +4,7 @@
 const Promise = require('bluebird');
 const TransitionResult = require('./transition-result');
 const addState = TransitionResult.addState;
-const {prop} = require('./props');
+const {prop} = require('./descriptors');
 
 
 /**
@@ -20,14 +20,14 @@ class Transition {
       this.promise = null;
     }
   }
-  setPromise(prom){this.promise = prom; return this}
+  //setPromise(prom){this.promise = prom; return this}
 }
 
 const TransitionProps = {
   cleanUp: prop(),
   promise: prop(),
-  _addState: prop().hide(),
-  _cb: prop().hide()
+  _addState: prop().hidden,
+  _cb: prop().hidden
 };
 
 function createTransition(){
@@ -60,4 +60,5 @@ exports.onEvent = function(bind, state){
   rtn._addState = addState(state);
   rtn.reset();
   rtn.cleanUp = bind(result=>rtn._cb(result));
+  return rtn;
 };
