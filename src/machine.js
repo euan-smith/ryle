@@ -2,7 +2,7 @@
  * Created by euans on 16/02/2017.
  */
 
-const {prop, defineProperties} = require('./props');
+const {prop} = require('./descriptors');
 const {makeState} = require('./state');
 
 class Machine extends Function{
@@ -23,14 +23,14 @@ class Machine extends Function{
 }
 
 const machineProps = {
-  _children: prop().create(()=>new Set()).hide().fix(),
-  _descendants: prop().create(()=>new Set()).hide().fix(),
-  _parent: prop().hide()
+  _children: prop(()=>new Set()).hidden.constant,
+  _descendants: prop(()=>new Set()).hidden.constant,
+  _parent: prop().hidden
 };
 
 
 exports.makeMachine = function(obj, parent, machine){
-  if (typeof parent !== 'undefined' && !exports.isMachine(parent)) throw new TypeError('second parameter must be undefined or a machine');
+  if (parent != null && !exports.isMachine(parent)) throw new TypeError('second parameter must be undefined or a machine');
   if (typeof obj !== 'object') throw new TypeError('first parameter must be an object');
 
   if (!machine){
@@ -38,9 +38,7 @@ exports.makeMachine = function(obj, parent, machine){
   } else {
     Object.setPrototypeOf(machine, Machine.prototype);
   }
-  console.log(machine);
-  //todo: Check if this special define props is needed
-  defineProperties(machine, machineProps);
+  Object.defineProperties(machine, machineProps);
   machine._parent = parent;
 
   //go through all ennumerable properties of the machine definition
@@ -52,10 +50,10 @@ exports.makeMachine = function(obj, parent, machine){
       machine._addChild(state);
     }
     else if (typeof obj[k] === 'object'){
-      let submachine = exports.makeMachine(obj[k]);
+      let submachine = exports.makeMachine(obj[k], machine);
       machine[k] = submachine;
       machine._addChild(submachine);
-    }
+    } else throw new TypeError('Machine definition properties must be functions (states) or objects (sub-machines)');
   }
   return machine;
 };
