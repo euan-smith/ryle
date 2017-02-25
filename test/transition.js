@@ -68,14 +68,15 @@ describe('transition', function(){
       t.reset();
       return t.promise;
     });
-    it('will null promise if it is reset after resolving', function(){
+    it('will null promise after resolving', function(){
       let res, rej;
       const p = new Promise((resolve, reject)=>{res=resolve; rej=reject});
       const d = {};
-      res(d);
       const t=transition.onPromise(p,s1);
-      return t.promise.then(()=>{
-        t.reset();
+      const pr=t.promise;
+      res(d);
+      return pr.then(()=>{
+        console.log(pr.isPending());
         expect(t.promise).to.equal(null);
       });
     });
@@ -118,7 +119,7 @@ describe('transition', function(){
     }
     it('creates a transition with both cleanUp and promise', function(){
       const clean = ()=>{};
-      const {trig, bind}=makeBinder(clean);
+      const {bind}=makeBinder(clean);
       const t = transition.onEvent(bind, state);
       expect(t).to.have.a.property('cleanUp').that.equals(clean);
       expect(t).to.have.a.property('promise').that.is.an.instanceOf(Promise);
@@ -135,7 +136,7 @@ describe('transition', function(){
         expect(tr.payload).to.equal(d1);
       })
     });
-    it('creates a transition which resolves on trigger and can be reset', function(){
+    it('creates a transition which resolves on trigger and automatically resets', function(){
       const clean = ()=>{};
       const {trig, bind}=makeBinder(clean);
       const t = transition.onEvent(bind, state);
@@ -143,7 +144,6 @@ describe('transition', function(){
       trig(d1);
       return t.promise.then(tr=>{
         expect(tr.payload).to.equal(d1);
-        t.reset();
         trig(d2);
         return t.promise;
       }).then(tr=>{

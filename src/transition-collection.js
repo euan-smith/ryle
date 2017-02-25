@@ -4,19 +4,20 @@
 const Promise = require('bluebird');
 const TransitionResult = require('./transition-result');
 const addState = TransitionResult.addState;
-const {prop} = require('./props');
+const {prop} = require('./descriptors');
 const {onTimeout, onExit, onPromise, onEvent} = require('./transition');
 
 const definitions = [];
 const samples = [];
 
 class TransitionCollection {
+
   constructor() {
-    this._transitions = [];
-    this._transferTransitions = null;
+    Object.defineProperties(this, TransitionCollection.properties);
   }
 
   addTransfer(transfer) {
+    if (this._hasCleanedUp) throw new Error('The collection is stale, it has already been cleaned-up');
     if (transfer instanceof TransitionCollection) {
       this._transferTransitions = transfer;
     } else {
@@ -31,6 +32,7 @@ class TransitionCollection {
   }
 
   _add(transition) {
+    if (this._hasCleanedUp) throw new Error('The collection is stale, it has already been cleaned-up');
     this._transitions.push(transition);
     return this;
   }
@@ -60,8 +62,8 @@ class TransitionCollection {
     //now need to look through definitions.
     let i = definitions.length, bind;
     while (i--) {
-      if (bind = definitions[i][0](trigger)) {
-        return this._add(onEvent(bind, state));
+      if (bind = definitions[i](trigger)) {
+        return this._add(onEvent(bind, stateOnOK));
       }
     }
 
@@ -69,17 +71,29 @@ class TransitionCollection {
   }
 
   resolve() {
+    if (this._hasCleanedUp) throw new Error('The collection is stale, it has already been cleaned-up');
     return Promise.race(this);
   }
 
   cleanUp() {
-    for (let t of this._transitions) if (t.cleanUp) t.cleanUp();
+    if (this._hasCleanedUp) throw new Error('The collection has already cleaned-up.');
+    for (let t of this._transitions) if (t.cleanUp) {
+      t.cleanUp();
+    }
+    this._hasCleanedUp=true;
   }
 }
 
+TransitionCollection.properties = {
+  _transitions: prop(()=>[]).hidden.constant,
+  _transferTransitions: prop().hidden,
+  _hasCleanedUp: prop(false).hidden
+};
+
+
 exports.isCollection = coll => coll instanceof TransitionCollection;
 
-exports.create = () => new TransitionCollection();
+exports.create = ()=>new TransitionCollection();
 
 exports.onExit = func => new TransitionCollection().onExit(func);
 
@@ -89,7 +103,7 @@ exports.on = (trigger, stateOnOK, stateOnFail) => new TransitionCollection().on(
 
 exports.registerEvent = (binderFunc, sample) => {
   if (!(sample instanceof Array)) sample = [sample];
-  for (let a of sample) if (!binderFunc(s)) throw new Error('Registration does not react to its own sample(s)');
+  for (let s of sample) if (!binderFunc(s)) throw new Error('Registration does not react to its own sample(s)');
 
   let i = samples.length;
   //The tests are done in reverse order, so it is OK for another test to react to this sample
@@ -100,6 +114,11 @@ exports.registerEvent = (binderFunc, sample) => {
 
   definitions.push(binderFunc);
   for (let s of sample)samples.push(s);
+};
+
+exports._clearRegister=()=>{
+  definitions.length=0;
+  samples.length=0;
 };
 
 /*

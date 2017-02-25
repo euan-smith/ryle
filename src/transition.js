@@ -13,11 +13,21 @@ const {prop} = require('./descriptors');
 class Transition {
   reset(){
     if (this._addState){
-      this.promise = new Promise(resolve=>this._cb = resolve)
-        .then(this._addState)
-        .then(r=>{this.reset();return r;});
-    } else if (this.promise && !this.promise.isPending()) {
+      this.setPromise(new Promise(resolve=>this._cb = resolve)
+        .then(this._addState));
+    } else {
+      if (this.promise && !this.promise.isPending()) {
+        this.setPromise(null);
+      }
+    }
+  }
+
+  setPromise(prom){
+    if (!prom){
       this.promise = null;
+    } else {
+      this.promise = prom;
+      prom.then(r=>{this.reset();return r;}, ()=>{});
     }
   }
   //setPromise(prom){this.promise = prom; return this}
@@ -43,15 +53,15 @@ exports.onExit = function(func) {
 
 exports.onTimeout = function(delay, state){
   const rtn = createTransition();
-  rtn.promise = Promise.delay(delay).then(addState(state));
+  rtn.setPromise(Promise.delay(delay).then(addState(state)));
   return rtn;
 };
 
 exports.onPromise = function(promise, resolveState, rejectState) {
   const rtn = createTransition();
-  rtn.promise = rejectState ?
+  rtn.setPromise(rejectState ?
     Promise.resolve(promise).then(addState(resolveState), addState(rejectState)) :
-    Promise.resolve(promise).then(addState(resolveState));
+    Promise.resolve(promise).then(addState(resolveState)));
   return rtn;
 };
 
