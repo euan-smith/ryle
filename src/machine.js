@@ -20,6 +20,16 @@ class Machine extends Function{
     this._descendants.add(state);
     if (this._parent) this._parent._addDescendant(state);
   }
+  _findChildWith(state){
+    for(let sub of this._children){
+      if (exports.isMachine(sub) && sub._hasDescendant(state)){
+        return sub;
+      }
+    }
+  }
+  $createContext(...args){
+    return {arguments:args};
+  }
 }
 
 const machineProps = {
@@ -28,6 +38,9 @@ const machineProps = {
   _parent: prop().hidden
 };
 
+const copyProperty = [
+  "$createContext"
+];
 
 exports.makeMachine = function(obj, parent, machine){
   if (parent != null && !exports.isMachine(parent)) throw new TypeError('second parameter must be undefined or a machine');
@@ -44,7 +57,10 @@ exports.makeMachine = function(obj, parent, machine){
   //go through all ennumerable properties of the machine definition
   //Any functions => states, any objects => machines
   for (let k of Object.keys(obj)){
-    if (typeof obj[k] === 'function'){
+    if (copyProperty.indexOf(k)!==-1){
+      machine[k]=obj[k];
+    }
+    else if (typeof obj[k] === 'function'){
       let state = makeState(obj[k]);
       machine[k]=state;
       machine._addChild(state);

@@ -16,6 +16,14 @@ describe('machine', function(){
     expect(()=>makeMachine(5)).to.throw(TypeError);
     expect(()=>makeMachine({a:5})).to.throw(TypeError);
   });
+  it('has a (default) $createContext method which can be overridden', function(){
+    const machine = makeMachine({});
+    expect(machine.$createContext).is.a('function');
+    expect(machine.$createContext(1,2,3)).is.deep.equal({arguments:[1,2,3]});
+    const machine2 = makeMachine({$createContext(a,b){return {a,b}}});
+    expect(machine2.$createContext(1,2,3)).is.deep.equal({a:1,b:2});
+    expect(isState(machine2.$createContext)).is.equal(false);
+  });
   it('isMachine responds correctly', function(){
     const machine = makeMachine({});
     expect(isMachine(machine)).to.equal(true);
@@ -63,4 +71,5 @@ describe('machine', function(){
     expect(machine.b._hasChild(def.a)).to.equal(false);
     expect(machine.b._hasChild(def.b.a)).to.equal(true);
   });
+  it('can trace a descendant');
 });

@@ -73,8 +73,8 @@ const actionProps = {
  */
 function create(async = true) {
   const action = async ?
-    d => action.triggerAsync(d) :
-    d => action.trigger(d);
+    function(d){action.triggerAsync(d); return this} :
+    function(d){action.trigger(d); return this};
   Object.setPrototypeOf(action, Action.prototype);
   Object.defineProperties(action, actionProps);
   return action;
@@ -105,27 +105,25 @@ function isAction(fn) {
   return fn instanceof Action;
 }
 
+
 /**
  * Registers the action type for use in Ryle
  * @param ryle - the Ryle object
  */
-// function register(ryle) {
-//   ryle.defineOn(
-//     function (action, resolve) {
-//       action.using(resolve);
-//       return function () {
-//         action.clear()
-//       };
-//     },
-//     function (action) {
-//       return arguments.length === 2 && action instanceof Action;
-//     },
-//     [create()]
-//   );
-// }
+function ryleRegister(register) {
+  register(
+    action=> isAction(action) && function (resolve) {
+      action.using(resolve);
+      return function () {
+        action.clear()
+      };
+    },
+    [create()]
+  );
+}
 
 /**
  * @module
  * @type {{create: create, createOn: createOn, register: register}}
  */
-module.exports = {create, createOn, isAction};
+module.exports = {create, createOn, isAction, ryleRegister};
