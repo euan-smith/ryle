@@ -5,7 +5,7 @@
 const {expect} = require('chai');
 const {makeState, isState, abstract, isAbstract} = require('../src/state');
 
-describe('state', function(){
+describe('state.js', function(){
   it('turns a function into a state',function(){
     const fn=()=>{};
     expect(isState(fn)).to.equal(false);

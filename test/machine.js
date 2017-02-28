@@ -6,7 +6,7 @@ const {expect} = require('chai');
 const {makeState, isState} = require('../src/state');
 const {makeMachine, isMachine} = require('../src/machine');
 
-describe('machine', function(){
+describe('machine.js', function(){
   it('creates an empty state machine with no additional enumerable properites',function(){
     const machine = makeMachine({});
     expect(Object.keys(machine)).has.lengthOf(0);
@@ -71,5 +71,15 @@ describe('machine', function(){
     expect(machine.b._hasChild(def.a)).to.equal(false);
     expect(machine.b._hasChild(def.b.a)).to.equal(true);
   });
-  it('can trace a descendant');
+  it('can trace a descendant', function(){
+    const def = {
+      a: ()=> {
+      }, b: {
+        a: ()=> {
+        }
+      }
+    };
+    const machine = makeMachine(def);
+    expect(machine._findChildWith(machine.b.a)).to.equal(machine.b);
+  });
 });

@@ -13,7 +13,7 @@ const {isResult} = require('../src/transition-result');
 var action = require('../src/action');
 
 
-describe('transition-collection', function(){
+describe('transition-collection.js', function(){
   it('create makes a transition collection', function(){
     const tc = create();
     expect(isCollection(tc)).to.equal(true);

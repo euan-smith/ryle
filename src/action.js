@@ -108,7 +108,7 @@ function isAction(fn) {
 
 /**
  * Registers the action type for use in Ryle
- * @param ryle - the Ryle object
+ * @param register - the ryle register method
  */
 function ryleRegister(register) {
   register(

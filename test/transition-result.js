@@ -6,7 +6,7 @@ const {expect} = require('chai');
 const {makeState, isState} = require('../src/state');
 const {create, entry, exit, addState, isResult} = require('../src/transition-result');
 
-describe('transition-result', function(){
+describe('transition-result.js', function(){
   const state = makeState(()=>{});
   describe('create',function(){
     it('creates a transition result with a state and payload', function(){

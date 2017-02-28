@@ -11,7 +11,7 @@ const {expect} = chai;
 const {makeState} = require('../src/state');
 
 
-describe('transition', function(){
+describe('transition.js', function(){
   describe('onExit', function(){
     it('should create a transition with only cleanup', function(){
       const fn=()=>{};

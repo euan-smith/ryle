@@ -6,7 +6,7 @@
 var action = require('../src/action');
 const {expect} = require('chai');
 
-describe('action', function () {
+describe('action.js', function () {
   describe('create', function(){
     it('creates an action which can be subscribed to and asynchronously triggered', function (done) {
       let test=false;
@@ -88,6 +88,27 @@ describe('action', function () {
     it('tests if an object is an action or not', function(){
       expect(action.isAction({})).to.equal(false);
       expect(action.isAction(action.create())).to.equal(true);
+    })
+  });
+  describe('ryleRegister', function(){
+    it('provides a registration function for rylw', function(){
+      let fn,ex;
+      action.ryleRegister((f,e)=>{fn=f; ex=e});
+      expect(fn).is.a('function');
+      expect(ex).is.instanceOf(Array);
+      const bnd = fn(ex[0]);
+      expect(!!bnd).is.equal(true);
+      let cnt=0;
+      const cb=v=>cnt+=v;
+      const clean=bnd(cb);
+      expect(clean).is.a('function');
+      expect(ex[0]._cb).is.equal(cb);
+      expect(cnt).is.equal(0);
+      ex[0].trigger(3);
+      expect(cnt).is.equal(3);
+      clean();
+      ex[0].trigger(3);
+      expect(cnt).is.equal(3);
     })
   })
 });
