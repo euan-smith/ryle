@@ -4,14 +4,14 @@
 const {makeMachine, isMachine} = require('./machine');
 const {on, create:createColl, isCollection} = require('./transition-collection');
 const {addState, isResult, create:createResult, exit} = require('./transition-result');
-const {create:createAction} = require('./action');
 const Promise = require('bluebird');
-const {isState} = require('./state');
+const {isState, abstract} = require('./state');
 
 function runFsm(machine, transition, context, trans){
   let coll = machine.$superState ? machine.$superState(context) : null;
   if (!isCollection(coll)) coll = createColl();
-  if (trans) coll.addTransfer(trans);
+  //with forced exit, there should always be a transfer object
+  coll.addTransfer(trans);
   if (machine === transition.state) {
     if (!isState(machine.$start)) return Promise.reject(new Error(`$start not defined in ${machine.name}`));
     transition.state = machine.$start;
@@ -42,16 +42,34 @@ function runState(machine, transition, context, trans){
   return prom.then(r=>runState(machine, r, context, trans));
 }
 
+function defer(){
+  let res,rej;
+  const prom = new Promise((rs,rj)=>{res=rs; rej=rj});
+  return {prom, res, rej};
+}
+
 module.exports.makeFSM = function(obj){
   //todo: add cancel
   //todo: add abstract states
   //todo: add exit transition
   const target = function(){
+    const {prom: forceProm, res: forceExit} = defer();
+    const forcedExit = abstract();
+    const coll = on(forceProm, forcedExit);
     const context = target.$createContext.apply(this, arguments);
-    const promise = runFsm(target, createResult(target), context)
-      .then(r=>r.isExit()?r.payload:r);
-    context.then=(okFn,failFn)=>promise.then(okFn,failFn);
-    context.catch=failFn=>promise.catch(failFn);
+    const runPromise = runFsm(target, createResult(target), context, coll);
+    const rtnPromise = runPromise.then(r=>{
+        if (r.isExit()) return r.payload;
+        if (r.state===forcedExit) return new Promise(res=>{});
+        return r;
+      });
+    context.then=(okFn,failFn)=>rtnPromise.then(okFn,failFn);
+    context.catch=failFn=>rtnPromise.catch(failFn);
+    context.exit = ()=>{
+      forceExit();
+      return runPromise.then(()=>{});
+    };
+
     return context;
   };
 

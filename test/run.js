@@ -73,7 +73,7 @@ describe('run', function(){
     const fsm=makeFSM({$start:()=>{}});
     const fsmInstance=fsm();
     rtn=fsmInstance.then(()=>{throw new Error('Should not resolve')});
-    return Promise.race(rtn, fsmInstance.exit().delay(100));
+    return Promise.race([rtn, fsmInstance.exit().delay(100)]);
   });
   it('can create a composable machine with abstract states',function(){
     const fsm=makeFSM({
