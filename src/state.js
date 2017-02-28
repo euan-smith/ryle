@@ -21,3 +21,20 @@ exports.makeState = function(func){
 };
 
 exports.isState = func => func instanceof State;
+
+class AbstractState extends State {
+
+}
+
+const aStateProps = {
+
+};
+
+exports.abstract = function(){
+  return Object.create(AbstractState.prototype, aStateProps);
+};
+
+exports.isAbstract = state => state instanceof AbstractState;
+
+
+

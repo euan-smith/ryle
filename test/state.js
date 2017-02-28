@@ -3,7 +3,7 @@
  */
 
 const {expect} = require('chai');
-const {makeState, isState} = require('../src/state');
+const {makeState, isState, abstract, isAbstract} = require('../src/state');
 
 describe('state', function(){
   it('turns a function into a state',function(){
@@ -16,5 +16,10 @@ describe('state', function(){
   it('throws an error if a function is not passed', function(){
     expect(()=>makeState()).to.throw(TypeError);
     expect(()=>makeState({})).to.throw(TypeError);
+  });
+  it('returns an abstract state', function(){
+    const a=abstract();
+    expect(isState(a)).to.equal(true);
+    expect(isAbstract(a)).to.equal(true);
   })
 });
