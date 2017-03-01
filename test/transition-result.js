@@ -15,6 +15,15 @@ describe('transition-result.js', function(){
       expect(r.payload).to.equal(42);
     });
   });
+  describe('setState', function(){
+    it('changes the state on the transition object', function(){
+      const state2 = makeState(()=>{});
+      const r = create(state,42);
+      r.setState(state2);
+      expect(r.state).to.equal(state2);
+      expect(r.payload).to.equal(42);
+    })
+  });
   describe('isResult', function(){
     it('returns true for a result', function(){
       expect(isResult(create(state))).to.equal(true);
