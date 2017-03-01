@@ -5,6 +5,7 @@
 
 var action = require('../src/action');
 const {expect} = require('chai');
+const Promise = require('bluebird');
 
 describe('action.js', function () {
   describe('create', function(){
@@ -89,6 +90,35 @@ describe('action.js', function () {
       expect(action.isAction({})).to.equal(false);
       expect(action.isAction(action.create())).to.equal(true);
     })
+  });
+  describe('onceActive', function(){
+    it('returns a promise', function(){
+      expect(action.create().onceActive()).to.be.an.instanceOf(Promise);
+    });
+    it('returns the same promise until resolved', function(){
+      const a=action.create();
+      expect(a.onceActive()).to.be.equal(a.onceActive());
+    });
+    it('resolves once there is a listener', function(){
+      const a=action.create();
+      let active=false;
+      a.onceActive().then(()=>active=true);
+      a.using(()=>{});
+      expect(active).to.equal(false);
+      return Promise.resolve().then(()=>{
+        expect(active).to.equal(true);
+      })
+    });
+    it('resolves immediately if there is already a listener', function(){
+      const a=action.create();
+      let active=false;
+      a.using(()=>{});
+      a.onceActive().then(()=>active=true);
+      expect(active).to.equal(false);
+      return Promise.resolve().then(()=>{
+        expect(active).to.equal(true);
+      });
+    });
   });
   describe('ryleRegister', function(){
     it('provides a registration function for ryle', function(){
