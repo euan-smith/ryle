@@ -3,7 +3,7 @@
  */
 
 const {prop} = require('./descriptors');
-const {makeState} = require('./state');
+const {makeState, isAbstract} = require('./state');
 
 class Machine extends Function{
   _hasChild(state){
@@ -58,6 +58,9 @@ exports.makeMachine = function(obj, parent, machine){
   //Any functions => states, any objects => machines
   for (let k of Object.keys(obj)){
     if (copyProperty.indexOf(k)!==-1){
+      machine[k]=obj[k];
+    }
+    else if (isAbstract(obj[k])){
       machine[k]=obj[k];
     }
     else if (typeof obj[k] === 'function'){

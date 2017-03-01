@@ -9,6 +9,11 @@ class TransitionResult {
   }
   isExit(){return this.state===null;}
 
+  setState(state){
+    this.state=state;
+    return this;
+  }
+
   static isResult(tr){return tr instanceof TransitionResult;}
   static addState(state){
     return payload=>new TransitionResult(state, payload);

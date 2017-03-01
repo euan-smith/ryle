@@ -22,6 +22,10 @@ class Action extends Function {
     if (!(fn instanceof Function)) throw new TypeError('action.on: The parameter must be a function.');
     this._cb = fn;
     this.isActive = true;
+    if (this._onceActive){
+      this._onceActive();
+      this._onceActive=null;
+    }
     return this;
   }
 
@@ -33,6 +37,7 @@ class Action extends Function {
   clear() {
     this._cb = null;
     this.isActive = false;
+    this._onceActive = this._onceActiveProm = null;
     return this;
   }
 
@@ -59,11 +64,23 @@ class Action extends Function {
     }
     return this;
   }
+
+  onceActive(){
+    if (this._onceActiveProm) return this._onceActiveProm;
+    if (this.isActive){
+      return this._onceActiveProm = Promise.resolve();
+    }
+    return this._onceActiveProm = new Promise(resolve=>{
+      this._onceActive = resolve;
+    })
+  }
 }
 
 const actionProps = {
   _cb: prop().hidden,
-  isActive: prop(false)
+  isActive: prop(false),
+  _onceActive: prop().hidden,
+  _onceActiveProm: prop().hidden
 };
 
 /**

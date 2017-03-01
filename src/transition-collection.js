@@ -3,9 +3,10 @@
  */
 const Promise = require('bluebird');
 const TransitionResult = require('./transition-result');
-const addState = TransitionResult.addState;
+const {addState, isResult} = TransitionResult;
 const {prop} = require('./descriptors');
-const {onTimeout, onExit, onPromise, onEvent} = require('./transition');
+const {onTimeout, onExit, onPromise, onEvent, onMachine} = require('./transition');
+const {isAbstract} = require('./state');
 
 const definitions = [];
 const samples = [];
@@ -37,6 +38,21 @@ class TransitionCollection {
     return this;
   }
 
+  _addAlias(abstract, state){
+    this._aliases.set(abstract, state);
+    return this;
+  }
+
+  _resolveAlias(result){
+    if (this._aliases.has(result.state)){
+      return result.setState(this._aliases.get(result.state));
+    }
+    if (this._transferTransitions){
+      return this._transferTransitions._resolveAlias(result);
+    }
+    return result;
+  }
+
   onExit(func) {
     return this._add(onExit(func));
   }
@@ -59,6 +75,10 @@ class TransitionCollection {
       ));
     }
 
+    if (isAbstract(trigger)){
+      return this._addAlias(trigger, stateOnOK);
+    }
+
     //now need to look through definitions.
     let i = definitions.length, bind;
     while (i--) {
@@ -70,9 +90,22 @@ class TransitionCollection {
     throw new Error('no definition for given transition parameters')
   }
 
+  using(machine, stateOnOK, stateOnFail){
+    if (typeof machine!== "object"
+      || typeof machine.then !== "function"
+      || typeof machine.catch !== "function"
+      || typeof machine.exit !== "function"){
+      throw new TypeError('First parameter must be a state machine instance');
+    }
+    return this._add(onMachine(
+      machine,
+      stateOnOK,
+      stateOnFail));
+  }
+
   resolve() {
     if (this._hasCleanedUp) throw new Error('The collection is stale, it has already been cleaned-up');
-    return Promise.race(this);
+    return Promise.race(this).then(tr=>this._resolveAlias(tr));
   }
 
   cleanUp() {
@@ -87,7 +120,8 @@ class TransitionCollection {
 TransitionCollection.properties = {
   _transitions: prop(()=>[]).hidden.constant,
   _transferTransitions: prop().hidden,
-  _hasCleanedUp: prop(false).hidden
+  _hasCleanedUp: prop(false).hidden,
+  _aliases: prop(()=>new Map()).hidden.constant
 };
 
 
@@ -100,6 +134,8 @@ exports.onExit = func => new TransitionCollection().onExit(func);
 exports.onTimeout = (delay, state) => new TransitionCollection().onTimeout(delay, state);
 
 exports.on = (trigger, stateOnOK, stateOnFail) => new TransitionCollection().on(trigger, stateOnOK, stateOnFail);
+
+exports.using = (machine, stateOnOK, stateOnFail) => new TransitionCollection().using(machine, stateOnOK, stateOnFail);
 
 exports.registerEvent = (binderFunc, sample) => {
   if (!(sample instanceof Array)) sample = [sample];

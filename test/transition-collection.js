@@ -7,8 +7,8 @@ const {expect} = chai;
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-iterator'));
 
-const {isCollection, create, onExit, onTimeout, on, registerEvent, _clearRegister} = require('../src/transition-collection');
-const {makeState} = require('../src/state');
+const {isCollection, create, onExit, onTimeout, on, using, registerEvent, _clearRegister} = require('../src/transition-collection');
+const {makeState, abstract} = require('../src/state');
 const {isResult} = require('../src/transition-result');
 var action = require('../src/action');
 
@@ -240,5 +240,88 @@ describe('transition-collection.js', function(){
       expect(tr.state).to.equal(state1);
       expect(tr.payload).to.equal(d1);
     });
-  })
+  });
+  it('can add an alias to an abstract state', function(){
+    _clearRegister();
+    const abs = abstract();
+    const state = makeState(()=>{});
+    const tc1 = on(abs,state);
+    const tc2 = on(true, abs);
+    tc2.addTransfer(tc1);
+    return tc2.resolve().then(tr=>{
+      expect(tr.state).to.equal(state);
+    })
+  });
+  describe('has a using method which binds in an eternal state machine',function(){
+    it('will resolve when the attached machine does', function(){
+      //here a state machine has then, catch and exit methods
+      let res,rej;
+      const mockFsm = new Promise((rs,rj)=>{res=rs; rej=rj});
+      let exited = false;
+      mockFsm.exit = ()=>{exited=true; return Promise.resolve()};
+
+      const state1 = makeState(()=>{}),state2 = makeState(()=>{});
+      const tc=using(mockFsm, state1, state2);
+
+      res(5);
+      return tc.resolve().then(tr=>{
+        expect(tr.state).to.equal(state1);
+        expect(tr.payload).to.equal(5);
+      });
+    });
+    it('will resolve the second state when the attached machine reject', function(){
+      //here a state machine has then, catch and exit methods
+      let res,rej;
+      const mockFsm = new Promise((rs,rj)=>{res=rs; rej=rj});
+      let exited = false;
+      mockFsm.exit = ()=>{exited=true; return Promise.resolve()};
+
+      const state1 = makeState(()=>{}),state2 = makeState(()=>{});
+      const tc=using(mockFsm, state1, state2);
+
+      rej(7);
+      return tc.resolve().then(tr=>{
+        expect(tr.state).to.equal(state2);
+        expect(tr.payload).to.equal(7);
+      });
+    });
+    it('will reject when the attached machine does', function(){
+      //here a state machine has then, catch and exit methods
+      let res,rej;
+      const mockFsm = new Promise((rs,rj)=>{res=rs; rej=rj});
+      let exited = false;
+      mockFsm.exit = ()=>{exited=true; return Promise.resolve()};
+
+      const state1 = makeState(()=>{});
+      const tc=using(mockFsm, state1);
+
+      const e = new Error();
+      rej(e);
+      return tc.resolve().then(()=>{
+        throw new Error('Should not have resolved')
+      },err=>{
+        expect(err).to.equal(e);
+      });
+    });
+    it('the attached machine will exit when another transition occurs', function(){
+      //here a state machine has then, catch and exit methods
+      let res,rej;
+      const mockFsm = new Promise((rs,rj)=>{res=rs; rej=rj});
+      let exited = false;
+      mockFsm.exit = ()=>{exited=true; return Promise.resolve()};
+
+      const state1 = makeState(()=>{}),state2 = makeState(()=>{});
+      const tc=using(mockFsm, state1).on(true, state2);
+
+      return tc.resolve().then(tr=>{
+        expect(tr.state).to.equal(state2);
+        expect(exited).to.equal(false);
+        tc.cleanUp();
+        expect(exited).to.equal(true);
+      });
+    });
+    it('an error will be thrown if the supplied object is not a machine instance', function(){
+      expect(()=>using({})).to.throw(TypeError);
+    })
+  });
 });

@@ -18,7 +18,7 @@ describe('transition.js', function(){
       const t = transition.onExit(fn);
       expect(t).to.have.a.property('cleanUp').that.equals(fn);
       expect(t).to.have.a.property('promise').that.equals(undefined);
-    })
+    });
   });
   describe('onTimeout', function(){
     it('should create a transition with a promise and no cleanup', function(){
@@ -47,6 +47,13 @@ describe('transition.js', function(){
       const t = transition.onPromise(p,s1,s2);
       expect(t).to.have.a.property('cleanUp').that.equals(undefined);
       expect(t).to.have.a.property('promise').that.is.an.instanceOf(Promise);
+    });
+    it('can optionally include a cleanup function', function(){
+      let res, rej;
+      const p = new Promise((resolve, reject)=>{res=resolve; rej=reject});
+      const fn=()=>{};
+      const t = transition.onPromise(p,s1,s2,fn);
+      expect(t).to.have.a.property('cleanUp').that.equals(fn);
     });
     it('with one state, should create a transition which resolves to that state', function(){
       let res, rej;

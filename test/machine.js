@@ -3,7 +3,7 @@
  */
 
 const {expect} = require('chai');
-const {makeState, isState} = require('../src/state');
+const {abstract, isState, isAbstract} = require('../src/state');
 const {makeMachine, isMachine} = require('../src/machine');
 
 describe('machine.js', function(){
@@ -49,6 +49,12 @@ describe('machine.js', function(){
     expect(isState(machine.a)).to.equal(true);
     expect(machine._hasChild(def.a)).to.equal(true);
     expect(machine._hasDescendant(def.a)).to.equal(true);
+  });
+  it('will pass abstract states straight through', function(){
+    const def={a:()=>{}, b:()=>{}, c:abstract()};
+    const machine = makeMachine(def);
+    expect(isAbstract(machine.c)).is.equal(true);
+    expect(machine.c).is.equal(def.c);
   });
   it('can create hierarchical machines', function() {
     const def = {

@@ -9,11 +9,11 @@ chai.use(require('chai-as-promised'));
 const {makeFSM} = require('../src/run');
 const {makeState, abstract} = require('../src/state');
 const {exit, isResult} = require('../src/transition-result');
-const {on, registerEvent} = require('../src/transition-collection');
+const {on, registerEvent, using} = require('../src/transition-collection');
 const {create:createAction, ryleRegister} = require('../src/action');
 ryleRegister(registerEvent);
 
-describe('run', function(){
+describe('run.js', function(){
   it('creates a simple state machine', function(){
     const fsm = makeFSM({
       $createContext(v){
@@ -87,11 +87,16 @@ describe('run', function(){
     });
     const fsma=fsm();
     const a={},b={};
-    fsma.a(a);
-    return fsma.then(tr=>{
+    let fsmb;
+    return fsma.a.onceActive().then(()=>{
+      fsma.a(a);
+      return fsma;
+    }).then(tr=> {
       expect(tr.state).to.equal(fsm.a);
       expect(tr.payload).to.equal(a);
-      const fsmb=fsm();
+      fsmb = fsm();
+      return fsmb.b.onceActive();
+    }).then(()=>{
       fsmb.b(b);
       return fsmb;
     }).then(tr=>{
@@ -101,12 +106,11 @@ describe('run', function(){
   });
 
   it('can use a composable machine',function(){
+    const trigA=createAction();
+    const trigB=createAction();
     const fsm=makeFSM({
-      $createContext(){
-        return {a:createAction(), b:createAction()}
-      },
       $start(){return this.wait},
-      wait(context){return on(context.a, this.a).on(context.b, this.b)},
+      wait(context){return on(trigA, this.a).on(trigB, this.b)},
       a:abstract(),
       b:abstract()
     });
@@ -119,17 +123,19 @@ describe('run', function(){
       second:()=>exit(2)
     });
     const fsma=fsm2();
-    const a={},b={};
-    fsma.a(a);
-    return fsma.then(tr=>{
-      expect(tr.state).to.equal(fsm.a);
-      expect(tr.payload).to.equal(a);
-      const fsmb=fsm();
-      fsmb.b(b);
+    let fsmb;
+    return trigA.onceActive().then(()=>{
+      trigA();
+      return fsma;
+    }).then(r=> {
+      expect(r).to.equal(1);
+      fsmb = fsm2();
+      return trigB.onceActive();
+    }).then(()=>{
+      trigB();
       return fsmb;
-    }).then(tr=>{
-      expect(tr.state).to.equal(fsm.b);
-      expect(tr.payload).to.equal(b);
+    }).then(r=>{
+      expect(r).to.equal(2);
     });
     /*
     the general pattern is:
@@ -148,9 +154,10 @@ describe('run', function(){
       -exit
     Other than that not much is needed, so duck-type the dependent interface.
 
-    so: in state we need an abstract method which creates an abstract state plus an isAbstract check.
-    in transition-collection we need the .on method to be able to define concrete methods to abstract results (an alias map)
+    so: in state we need an abstract method which creates an abstract state plus an isAbstract check. (done)
+    in transition-collection we need the .on method to be able to define concrete methods to abstract results (an alias map) (done)
     also in tc we need a .using method which ties in a state machine instance
+    finally abstract methods should NOT be added to children (done)
 
      */
 

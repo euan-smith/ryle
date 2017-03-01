@@ -91,7 +91,7 @@ describe('action.js', function () {
     })
   });
   describe('ryleRegister', function(){
-    it('provides a registration function for rylw', function(){
+    it('provides a registration function for ryle', function(){
       let fn,ex;
       action.ryleRegister((f,e)=>{fn=f; ex=e});
       expect(fn).is.a('function');

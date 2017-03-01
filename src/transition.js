@@ -2,8 +2,7 @@
  * Created by euans on 14/02/2017.
  */
 const Promise = require('bluebird');
-const TransitionResult = require('./transition-result');
-const addState = TransitionResult.addState;
+const {addState, isResult} = require('./transition-result');
 const {prop} = require('./descriptors');
 
 
@@ -57,11 +56,26 @@ exports.onTimeout = function(delay, state){
   return rtn;
 };
 
-exports.onPromise = function(promise, resolveState, rejectState) {
+exports.onPromise = function(promise, resolveState, rejectState, exitFunc) {
   const rtn = createTransition();
   rtn.setPromise(rejectState ?
     Promise.resolve(promise).then(addState(resolveState), addState(rejectState)) :
     Promise.resolve(promise).then(addState(resolveState)));
+  if (exitFunc) rtn.cleanUp = exitFunc;
+  return rtn;
+};
+
+exports.onMachine = function(machine, resolveState, rejectState){
+  const rtn = createTransition();
+  rtn.setPromise(machine.then(rslt=>{
+    if (isResult(rslt)) return rslt;
+    if (resolveState) return addState(resolveState)(rslt);
+    throw new Error('Attached machine has exited with no state transition defined on parent.')
+  }, er=>{
+    if (rejectState) return addState(rejectState)(er);
+    throw er;
+  }));
+  rtn.cleanUp = ()=>machine.exit();
   return rtn;
 };
 
