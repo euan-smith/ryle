@@ -49,9 +49,6 @@ function defer(){
 }
 
 module.exports.makeFSM = function(obj){
-  //todo: add cancel
-  //todo: add abstract states
-  //todo: add exit transition
   const target = function(){
     const {prom: forceProm, res: forceExit} = defer();
     const forcedExit = abstract();
