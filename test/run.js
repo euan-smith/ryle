@@ -72,7 +72,7 @@ describe('run.js', function(){
   it('provides an exit method which (nicely) exits the machine',function(){
     const fsm=makeFSM({$start:()=>{}});
     const fsmInstance=fsm();
-    rtn=fsmInstance.then(()=>{throw new Error('Should not resolve')});
+    const rtn=fsmInstance.then(()=>{throw new Error('Should not resolve')});
     return Promise.race([rtn, fsmInstance.exit().delay(100)]);
   });
   it('can create a composable machine with abstract states',function(){
@@ -110,7 +110,7 @@ describe('run.js', function(){
     const trigB=createAction();
     const fsm=makeFSM({
       $start(){return this.wait},
-      wait(context){return on(trigA, this.a).on(trigB, this.b)},
+      wait(){return on(trigA, this.a).on(trigB, this.b)},
       a:abstract(),
       b:abstract()
     });

@@ -3,8 +3,8 @@
  */
 
 const {expect} = require('chai');
-const {makeState, isState} = require('../src/state');
-const {create, entry, exit, addState, isResult} = require('../src/transition-result');
+const {makeState} = require('../src/state');
+const {create, exit, addState, isResult} = require('../src/transition-result');
 
 describe('transition-result.js', function(){
   const state = makeState(()=>{});

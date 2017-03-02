@@ -3,7 +3,7 @@
  */
 const {makeMachine, isMachine} = require('./machine');
 const {on, create:createColl, isCollection} = require('./transition-collection');
-const {addState, isResult, create:createResult, exit} = require('./transition-result');
+const {addState, isResult, create:createResult} = require('./transition-result');
 const Promise = require('bluebird');
 const {isState, abstract} = require('./state');
 

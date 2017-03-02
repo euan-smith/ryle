@@ -6,6 +6,7 @@ const chai = require('chai');
 const {expect} = chai;
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-iterator'));
+const Promise = require('bluebird');
 
 const {isCollection, create, onExit, onTimeout, on, using, registerEvent, _clearRegister} = require('../src/transition-collection');
 const {makeState, abstract} = require('../src/state');
@@ -227,8 +228,8 @@ describe('transition-collection.js', function(){
     const state1 = makeState(()=>{});
     const state2 = makeState(()=>{});
     const {evCheck:check1, trig:trig1} = makeRegister('test1', cnt++);
-    const {evCheck:check2, trig:trig2} = makeRegister('test2', cnt+=2);
-    const d1={}, d2={};
+    const {evCheck:check2} = makeRegister('test2', cnt+=2);
+    const d1={};
     registerEvent(check1, 'test1');
     registerEvent(check2, 'test2');
     const tc1 = on('test1',state1);
@@ -239,6 +240,7 @@ describe('transition-collection.js', function(){
     return tc2.resolve().then(tr=>{
       expect(tr.state).to.equal(state1);
       expect(tr.payload).to.equal(d1);
+      expect(cnt).to.equal(3);
     });
   });
   it('can add an alias to an abstract state', function(){

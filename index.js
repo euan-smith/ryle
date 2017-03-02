@@ -1,17 +1,34 @@
-/**
- * Created by euans on 18/12/2016.
- */
+const {using, onExit, onTimeout, on, registerEvent} = require('./src/transition-collection');
+const {makeFSM} = require('./src/run');
+const {exit}  = require('./src/transition-result');
+const {prop} = require('./src/descriptors');
 
-//Still using the old code with a hack-around
-var ryle=require('./src/fsm-old.js');
+const constantTrue = prop(true).hidden.constant;
 
-//quick fix for an exit function
-ryle.exit=function(v){return v===undefined?{}:v};
+function ryle(obj){
+  return makeFSM(obj);
+}
 
+Object.assign(ryle, {
+  onExit,
+  onTimeout,
+  on,
+  using,
+  exit,
+  use(lib){
+    if (typeof lib.ryleRegister !== "function"){
+      throw new TypeError('library does not have a Ryle registration method');
+    }
+    if (lib.ryleRegister._ryleInstalled) return;
+    Object.defineProperty(lib.ryleRegister, '_ryleInstalled', constantTrue);
+    lib.ryleRegister(registerEvent);
+    return this;
+  }
+});
 
 //add in the actions and bind them
-var actionLib=require('./src/action');
-ryle.action=actionLib.create;
-actionLib.register(ryle);
+ryle.action = require('./src/action');
+ryle.use(ryle.action);
 
-module.exports=ryle;
+module.exports = ryle;
+

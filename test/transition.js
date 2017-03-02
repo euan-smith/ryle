@@ -126,7 +126,7 @@ describe('transition.js', function(){
       mockFsm.exit = mockExit;
       return mockFsm;
     }
-    const mockExit = ()=>{exited=true; return Promise.resolve()}
+    const mockExit = ()=>{exited=true; return Promise.resolve()};
     it('will resolve when the attached machine does', function(){
       //here a state machine has then, catch and exit methods
       const mockFsm = makeMockFsm();

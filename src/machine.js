@@ -27,6 +27,7 @@ class Machine extends Function{
       }
     }
   }
+  //noinspection JSMethodCanBeStatic
   $createContext(...args){
     return {arguments:args};
   }
@@ -60,6 +61,9 @@ exports.makeMachine = function(obj, parent, machine){
     if (copyProperty.indexOf(k)!==-1){
       machine[k]=obj[k];
     }
+    //todo: ideally add to a list of own abstract states so that
+    //they will not be passed out of an attached machine
+    //and cause the parent machine to exit
     else if (isAbstract(obj[k])){
       machine[k]=obj[k];
     }

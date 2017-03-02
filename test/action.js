@@ -21,7 +21,11 @@ describe('action.js', function () {
     });
     it('creates an action which reports if it is active or not', function(){
       const act = action.create();
-
+      expect(act.isActive).to.equal(false);
+      act.using(()=>{});
+      expect(act.isActive).to.equal(true);
+      act.clear();
+      expect(act.isActive).to.equal(false);
     });
     it('creates an action which can be called synchronously or asynchronously', function (done) {
       let cnt=0;

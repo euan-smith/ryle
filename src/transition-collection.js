@@ -3,7 +3,6 @@
  */
 const Promise = require('bluebird');
 const TransitionResult = require('./transition-result');
-const {addState, isResult} = TransitionResult;
 const {prop} = require('./descriptors');
 const {onTimeout, onExit, onPromise, onEvent, onMachine} = require('./transition');
 const {isAbstract} = require('./state');
