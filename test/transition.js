@@ -4,7 +4,7 @@
 
 var Promise = require('bluebird');
 var transition = require('../src/transition');
-var {isResult} = require('../src/transition-result');
+var {isResult, exit, create:createResult} = require('../src/transition-result');
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const {expect} = chai;
@@ -83,7 +83,6 @@ describe('transition.js', function(){
       const pr=t.promise;
       res(d);
       return pr.then(()=>{
-        console.log(pr.isPending());
         expect(t.promise).to.equal(null);
       });
     });
@@ -115,6 +114,82 @@ describe('transition.js', function(){
         expect(tr.state).to.equal(s2);
         expect(tr.payload).to.equal(e);
       });
+    });
+  });
+  describe('onMachine', function(){
+    const state1=makeState(()=>{});
+    const state2=makeState(()=>{});
+    let res,rej,exited;
+    function makeMockFsm(){
+      const mockFsm = new Promise((rs,rj)=>{res=rs; rej=rj});
+      exited = false;
+      mockFsm.exit = mockExit;
+      return mockFsm;
+    }
+    const mockExit = ()=>{exited=true; return Promise.resolve()}
+    it('will resolve when the attached machine does', function(){
+      //here a state machine has then, catch and exit methods
+      const mockFsm = makeMockFsm();
+      const t=transition.onMachine(mockFsm, state1, state2);
+
+      res(5);
+      return t.promise.then(tr=>{
+        expect(tr.state).to.equal(state1);
+        expect(tr.payload).to.equal(5);
+      });
+    });
+    it('will throw an error if attached machine resolves with something other than a transition result and there is no resolveState supplied', function(){
+      //here a state machine has then, catch and exit methods
+      const mockFsm = makeMockFsm();
+      const t=transition.onMachine(mockFsm);
+
+      res(5);
+      return expect(t.promise).to.be.rejectedWith(Error);
+    });
+    it('will resolve with the same transition when the attached machine does', function(){
+      //here a state machine has then, catch and exit methods
+      const mockFsm = makeMockFsm();
+      const t=transition.onMachine(mockFsm, state1, state2);
+      const state3 = makeState(()=>{});
+
+      res(createResult(state3, 5));
+      return t.promise.then(tr=>{
+        expect(tr.state).to.equal(state3);
+        expect(tr.payload).to.equal(5);
+      });
+    });
+    it('will resolve the second state when the attached machine reject', function(){
+      //here a state machine has then, catch and exit methods
+      const mockFsm = makeMockFsm();
+      const t=transition.onMachine(mockFsm, state1, state2);
+
+      rej(7);
+      return t.promise.then(tr=>{
+        expect(tr.state).to.equal(state2);
+        expect(tr.payload).to.equal(7);
+      });
+    });
+    it('will reject when the attached machine does', function(){
+      //here a state machine has then, catch and exit methods
+      const mockFsm = makeMockFsm();
+      const t=transition.onMachine(mockFsm, state1);
+
+      const e = new Error();
+      rej(e);
+      return t.promise.then(()=>{
+        throw new Error('Should not have resolved')
+      },err=>{
+        expect(err).to.equal(e);
+      });
+    });
+    it('the attached machine will exit on cleanUp', function(){
+      //here a state machine has then, catch and exit methods
+      const mockFsm = makeMockFsm();
+
+      const t=transition.onMachine(mockFsm, state1, state2);
+      t.cleanUp();
+
+      expect(exited).to.equal(true);
     });
   });
   describe('onEvent', function(){
