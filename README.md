@@ -1,4 +1,4 @@
-# Ryle
+# Ryle ![test](https://travis-ci.org/zakalwe314/ryle.svg?branch=master)
 A full hierarchical Finite State Machine (fsm) library built on promises.
 
 ## What's a state machine?
