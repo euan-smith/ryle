@@ -3,7 +3,7 @@
  */
 const Promise = require('bluebird');
 const {addState, isResult} = require('./transition-result');
-const {prop} = require('./descriptors');
+const prop = require('prop-d');
 
 
 /**

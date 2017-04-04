@@ -4,7 +4,7 @@
 
 "use strict";
 const Promise = require('bluebird');
-const {prop} = require('./descriptors');
+const prop = require('prop-d');
 
 /**
  * A function which can be listened to.  This is intended to be used as part of an interface, but where

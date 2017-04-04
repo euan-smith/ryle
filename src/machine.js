@@ -2,7 +2,7 @@
  * Created by euans on 16/02/2017.
  */
 
-const {prop} = require('./descriptors');
+const prop = require('prop-d');
 const {makeState, isAbstract} = require('./state');
 
 class Machine extends Function{

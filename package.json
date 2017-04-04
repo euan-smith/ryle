@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "bluebird": "^3.4.7",
-    "mini-signals": "^1.1.1"
+    "mini-signals": "^1.1.1",
+    "prop-d": "^1.3.1"
   }
 }
