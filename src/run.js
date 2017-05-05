@@ -2,13 +2,13 @@
  * Created by euans on 26/02/2017.
  */
 const {makeMachine, isMachine} = require('./machine');
-const {on, create:createColl, isCollection} = require('./transition-collection');
+const {on, create:createColl, isCollection, setTriggerDefinitions} = require('./transition-collection');
 const {addState, isResult, create:createResult} = require('./transition-result');
 const Promise = require('bluebird');
 const {isState, abstract} = require('./state');
 
 function executeState(machine, state, context, payload){
-  //todo: set trigger defs
+  setTriggerDefinitions(machine.$triggerTypes);
   return state.call(machine, context, payload);
 }
 
