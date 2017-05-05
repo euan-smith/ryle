@@ -135,7 +135,7 @@ exports.on = (trigger, stateOnOK, stateOnFail) => new TransitionCollection().on(
 
 exports.using = (machine, stateOnOK, stateOnFail) => new TransitionCollection().using(machine, stateOnOK, stateOnFail);
 
-exports.setTriggerDefinitions= defs =>{definitions=defs};
+exports.setTriggerDefinitions= triggerDefinitions =>{definitions=triggerDefinitions};
 
 /*
  A definition provides a param count (without state), a test function and test params
