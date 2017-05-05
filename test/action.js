@@ -124,25 +124,4 @@ describe('action.js', function () {
       });
     });
   });
-  describe('ryleRegister', function(){
-    it('provides a registration function for ryle', function(){
-      let fn,ex;
-      action.ryleRegister((f,e)=>{fn=f; ex=e});
-      expect(fn).is.a('function');
-      expect(ex).is.instanceOf(Array);
-      const bnd = fn(ex[0]);
-      expect(!!bnd).is.equal(true);
-      let cnt=0;
-      const cb=v=>cnt+=v;
-      const clean=bnd(cb);
-      expect(clean).is.a('function');
-      expect(ex[0]._cb).is.equal(cb);
-      expect(cnt).is.equal(0);
-      ex[0].trigger(3);
-      expect(cnt).is.equal(3);
-      clean();
-      ex[0].trigger(3);
-      expect(cnt).is.equal(3);
-    })
-  })
 });

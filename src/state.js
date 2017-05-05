@@ -1,5 +1,4 @@
 class State extends Function {
-
 }
 
 exports.makeState = function(func){

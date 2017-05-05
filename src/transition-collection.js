@@ -3,12 +3,11 @@
  */
 const Promise = require('bluebird');
 const TransitionResult = require('./transition-result');
-const prop = require('prop-d');
+const {hidden} = require('prop-d');
 const {onTimeout, onExit, onPromise, onEvent, onMachine} = require('./transition');
 const {isAbstract} = require('./state');
 
-const definitions = [];
-const samples = [];
+let definitions = [];
 
 class TransitionCollection {
 
@@ -117,10 +116,10 @@ class TransitionCollection {
 }
 
 TransitionCollection.properties = {
-  _transitions: prop(()=>[]).hidden.constant,
-  _transferTransitions: prop().hidden,
-  _hasCleanedUp: prop(false).hidden,
-  _aliases: prop(()=>new Map()).hidden.constant
+  _transitions: hidden(()=>[]).constant,
+  _transferTransitions: hidden(),
+  _hasCleanedUp: hidden(false),
+  _aliases: hidden(()=>new Map()).constant
 };
 
 
@@ -136,25 +135,7 @@ exports.on = (trigger, stateOnOK, stateOnFail) => new TransitionCollection().on(
 
 exports.using = (machine, stateOnOK, stateOnFail) => new TransitionCollection().using(machine, stateOnOK, stateOnFail);
 
-exports.registerEvent = (binderFunc, sample) => {
-  if (!(sample instanceof Array)) sample = [sample];
-  for (let s of sample) if (!binderFunc(s)) throw new Error('Registration does not react to its own sample(s)');
-
-  let i = samples.length;
-  //The tests are done in reverse order, so it is OK for another test to react to this sample
-  // but it is not OK for this test to react to an existing sample
-  while (i--) {
-    if (binderFunc(samples[i])) throw new Error('This registration reacts to an existing test sample - try being more specific.')
-  }
-
-  definitions.push(binderFunc);
-  for (let s of sample)samples.push(s);
-};
-
-exports._clearRegister=()=>{
-  definitions.length=0;
-  samples.length=0;
-};
+exports.setTriggerDefinitions= defs =>{definitions=defs};
 
 /*
  A definition provides a param count (without state), a test function and test params

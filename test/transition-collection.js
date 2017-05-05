@@ -8,7 +8,7 @@ chai.use(require('chai-as-promised'));
 chai.use(require('chai-iterator'));
 const Promise = require('bluebird');
 
-const {isCollection, create, onExit, onTimeout, on, using, registerEvent, _clearRegister} = require('../src/transition-collection');
+const {isCollection, create, onExit, onTimeout, on, using, setTriggerDefinitions} = require('../src/transition-collection');
 const {makeState, abstract} = require('../src/state');
 const {isResult} = require('../src/transition-result');
 var action = require('../src/action');
@@ -136,11 +136,10 @@ describe('transition-collection.js', function(){
     }, trig1, trig2};
   }
   it('registers an event which can be triggered', function(){
-    _clearRegister();
     let cnt=0;
     const state = makeState(()=>{});
     const {evCheck, trig} = makeRegister('test1', ()=>cnt++);
-    registerEvent(evCheck, 'test1');
+    setTriggerDefinitions([evCheck]);
     const tc = on('test1',state);
     trig(5);
     return tc.resolve().then(tr=>{
@@ -151,26 +150,19 @@ describe('transition-collection.js', function(){
       expect(cnt).to.equal(1);
     })
   });
-  it('throws an error if the registration isn\'t valid', function(){
-    _clearRegister();
-    expect(()=>registerEvent(s=>false, 'test')).to.throw(Error);
-  });
-  it('throws an error if there is already a registration for the given type', function(){
-    _clearRegister();
-    registerEvent(s=>true, 'test');
-    expect(()=>registerEvent(s=>true, 'test')).to.throw(Error);
-  });
-  it('throws an error if an event is not recognised', function(){
-    _clearRegister();
-    expect(()=>on('undefined', makeState(()=>{}))).to.throw(Error);
+  it('throws an error if the event is unknown', function(){
+    let cnt=0;
+    const state = makeState(()=>{});
+    const {evCheck, trig} = makeRegister('test1', ()=>cnt++);
+    setTriggerDefinitions([]);
+    expect(()=>on('test1',state)).to.throw(Error);
   });
   it('can register more than one event type', function(){
-    _clearRegister();
     let cnt=0;
     const state1 = makeState(()=>{}),state2 = makeState(()=>{});
     const {evCheck, trig1, trig2} = makeDualRegister('test1','test2',()=>cnt++,()=>cnt+=2);
     const d1={}, d2={};
-    registerEvent(evCheck, ['test1','test2']);
+    setTriggerDefinitions([evCheck]);
     const tc = on('test1',state1).on('test2',state2);
     trig1(d1);
     return tc.resolve().then(tr=>{
@@ -189,15 +181,13 @@ describe('transition-collection.js', function(){
     })
   });
   it('can be triggered by different events and reset in between', function(){
-    _clearRegister();
     let cnt=0;
     const state1 = makeState(()=>{});
     const state2 = makeState(()=>{});
     const {evCheck:check1, trig:trig1} = makeRegister('test1', cnt++);
     const {evCheck:check2, trig:trig2} = makeRegister('test2', cnt+=2);
     const d1={}, d2={};
-    registerEvent(check1, 'test1');
-    registerEvent(check2, 'test2');
+    setTriggerDefinitions([check1,check2]);
     const tc = on('test1',state1).on('test2',state2);
     trig1(d1);
     return tc.resolve().then(tr=>{
@@ -223,15 +213,13 @@ describe('transition-collection.js', function(){
     expect(()=>tc.addTransfer()).to.throw(Error);
   });
   it('can use a transfer object', function(){
-    _clearRegister();
     let cnt=0;
     const state1 = makeState(()=>{});
     const state2 = makeState(()=>{});
     const {evCheck:check1, trig:trig1} = makeRegister('test1', cnt++);
     const {evCheck:check2} = makeRegister('test2', cnt+=2);
     const d1={};
-    registerEvent(check1, 'test1');
-    registerEvent(check2, 'test2');
+    setTriggerDefinitions([check1,check2]);
     const tc1 = on('test1',state1);
     const tc2 = on('test2',state2);
     expect(()=>tc2.addTransfer({})).to.throw(TypeError);
@@ -244,7 +232,7 @@ describe('transition-collection.js', function(){
     });
   });
   it('can add an alias to an abstract state', function(){
-    _clearRegister();
+    setTriggerDefinitions([]);
     const abs = abstract();
     const state = makeState(()=>{});
     const tc1 = on(abs,state);

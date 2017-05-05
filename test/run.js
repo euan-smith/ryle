@@ -9,9 +9,14 @@ chai.use(require('chai-as-promised'));
 const {makeFSM} = require('../src/run');
 const {makeState, abstract} = require('../src/state');
 const {exit, isResult} = require('../src/transition-result');
-const {on, registerEvent, using} = require('../src/transition-collection');
-const {create:createAction, ryleRegister} = require('../src/action');
-ryleRegister(registerEvent);
+const {on, setTriggerDefinitions, using} = require('../src/transition-collection');
+const {create:createAction, isAction} = require('../src/action');
+setTriggerDefinitions([action=> isAction(action) && function (resolve) {
+  action.using(resolve);
+  return function () {
+    action.clear()
+  };
+}]);
 
 describe('run.js', function(){
   it('creates a simple state machine', function(){

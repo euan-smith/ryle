@@ -122,25 +122,8 @@ function isAction(fn) {
   return fn instanceof Action;
 }
 
-
-/**
- * Registers the action type for use in Ryle
- * @param register - the ryle register method
- */
-function ryleRegister(register) {
-  register(
-    action=> isAction(action) && function (resolve) {
-      action.using(resolve);
-      return function () {
-        action.clear()
-      };
-    },
-    [create()]
-  );
-}
-
 /**
  * @module
  * @type {{create: create, createOn: createOn, register: register}}
  */
-module.exports = {create, createOn, isAction, ryleRegister};
+module.exports = {create, createOn, isAction};

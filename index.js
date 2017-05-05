@@ -1,9 +1,8 @@
 const {using, onExit, onTimeout, on, registerEvent} = require('./src/transition-collection');
 const {makeFSM} = require('./src/run');
 const {exit}  = require('./src/transition-result');
-const {prop} = require('./src/descriptors');
 
-const constantTrue = prop(true).hidden.constant;
+const constantTrue = require('prop-d')(true).hidden.constant;
 
 function ryle(obj){
   return makeFSM(obj);

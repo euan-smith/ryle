@@ -1,149 +1,244 @@
 # Ryle API
 
-1. [State Machine Declaration](#state-machine-declatation)
-   1. [Machine Structure](#machine-structure)
-   1. [Machine Object](#machine-object)
-   1. [Machine Instance](#machine-instance)
-1. [Defining a State](#defining-a-state)
-   1. [On Entry](#on-entry)
-   1. [On Exit](#on-exit)
-   1. [Transitions](#transitions)
-   1. [Binding Events](#binding-events)
-   1. [Hooks](#hooks)
-1. [Hierarchical Machines](#hierarchical-machines)
-1. [Composable Machines](#composable-machines)
-1. [Examples](#examples)
-   1. [Countdown](#countdown)
-   1. [Long REST](#long-rest)
-   1. [Door](#door)
+1. [Ryle global object](#ryle)
+    1. [ryle()](#ryle-fn) ⇒ <code>[Machine](#machine)</code>
+    2. [ryle.on()](#ryle-on) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+    3. [ryle.onTimeout()](#ryle-on-timeout) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+    4. [ryle.onExit()](#ryle-on-exit) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+    5. [ryle.using()](#ryle-using) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+    6. [ryle.exit()](#ryle-exit) ⇒ <code>[TransitionResult](#transition-result)</code>
+    7. [ryle.abstract()](#ryle-abstract) ⇒ <code>[State](#state)</code>
+2. [State Machine Definition](#machine-def)
+    1. [State Definition](#state)
+    2. [$createContext](#create-context)
+    3. [$start](#start)
+    4. [$superstate](#superstate)
+3. [State Machine](#machine) <code>\<Function></code>
+    1. [machine::()](#machine-fn) ⇒ <code>[Context](#context)</code>
+4. [Context](#context) <code>\<Promise></code>
+    1. [context::exit()](#context-exit) ⇒ <code>Promise</code>
+5. [Transition Collection](#transition-collection)
+    1. [transitionCollection::onTimeout(...)](#transition-collection-on-timeout) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+    2. [transitionCollection::onExit(...)](#transition-collection-on-exit) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+    3. [transitionCollection::using(...)](#transition-collection-using) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+    4. [transitionCollection::on(...)](#transition-collection-on) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+    5. [Custom transition triggers](#custom-triggers)
+6. [Transition Result](#transition-result)
+7. [Action](#action)
+7. [Examples](#examples)
 
-## State Machine Declaration
+<a name="ryle"></a>
+## Ryle global object
 
-A state machine is declared, after requiring `ryle`, with:
-```javascript
-const machineObject = ryle(machineStructure);
+The ryle global object is both the [machine](#machine) [factory function](#ryle-fn) and a container object for
+the helper functions needed to define a state machine.  A ryle machine is itself a factory function which initiates a
+new instance of a state machine and returns the [context](#context) which is the interface to a
+running state machine.
+
+**Example**
+```js
+const ryle=require('ryle');
+
+//define a state machine
+const foo=ryle({
+  //state machine definition
+  //...
+});
+
+//make two instances of a foo machine
+const foo1=foo();
+const foo2=foo();
+
+foo1.then(()=>{
+  //do something once foo1 is done
+});
+
+//force foo2 to exit
+foo2.exit();
 ```
-An active instance of a machine is created with:
-```javascript
-const machineInstance = machineObject(<params>)
+
+<a name="ryle-fn"></a>
+### ryle ([transition_definitions,] machine_definition) ⇒ <code>[Machine](#machine)</code>
+
+Creates a [state machine](#machine) function.
+
+**Parameters**
+
+|Parameter|type|description|
+|---|---|---|
+|trigger_definitions (optional)|<code>Array.\<[trigger-definition](#custom-triggers)></code>|
+|machine_definition|[state machine definition](#machine-def)|
+
+<a name="ryle-on"></a>
+### ryle.on(...) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+A initiates a [transition collection](#transition-collection) and calls its `.on` method.
+See [transitionCollection.on](#transition-collection-on) for more details.
+
+<a name="ryle-on-timeout"></a>
+### ryle.onTimeout(...) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+A initiates a [transition collection](#transition-collection) and calls its `.onTimeout` method.
+See [transitionCollection.onTimeout](#transition-collection-on-timeout) for more details.
+
+<a name="ryle-on-exit"></a>
+### ryle.onExit(...) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+A initiates a [transition collection](#transition-collection) and calls its `.onExit` method.
+See [transitionCollection.onExit](#transition-collection-on-exit) for more details.
+
+<a name="ryle-using"></a>
+### ryle.using(...) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+A initiates a [transition collection](#transition-collection) and calls its `.using` method.
+See [transitionCollection.using](#transition-collection-using) for more details.
+
+<a name="ryle-exit"></a>
+### ryle.exit([result]) ⇒ <code>[TransitionResult](#transition-result)</code>
+Returns a [transition result](#transition-result) which, if returned by a state function,
+will cause the state machine to make an orderly exit (cleaning up and calling onExit methods as it goes)
+and cause the state machine instance [context](#context) to resolve.
+
+|Parameter|type|description|
+|---|---|---|
+|result (optional)|any|The value with which the state machine instance [context](#context) will resulve.
+
+*usage example*
+```js
+const myFsm = ryle({
+  //...
+  done(){
+    //exit the state machine with a result
+    return ryle.exit("OK!");
+  }
+})
 ```
-The first section below deals with the machine structure, object and instance are described in the following sections.
+More examples using `ryle.exit()`: [countdown](#examples-countdown)
 
-### Machine Structure
-The machine structure passed to `ryle` is a javascript object containing the state definitions.  The only thing it _must_
-contain is a getter function called `_start` which returns the initial state.  Clearly the machine is not a lot of use
-if it does not also contain any states, however `ryle` will only throw an error in the absence of a `_start`.
+<a name="ryle-abstract"></a>
+### ryle.abstract() ⇒ <code>[State](#state)</code>
+Returns a [state](#state) without a concrete definition.
+For use with  [transitionCollection.using](transition-collection-using).
+Any transition to an abstract state _must_ be caught in a containing state machine otherwise an error will be thrown.
+See [composable state machines](composable-state-machines) for more details.
 
-So, the simplest structure:
-```javascript
-const machineObject = ryle({
-  get _start(){return this.initial},
-  initial(context){
-    //state definition
+*usage example*
+```js
+const foo = ryle({
+  //...
+  result: ryle.abstract()
+});
+
+const bar = ryle({
+  //...
+  doFoo(){
+    //enter the foo state machine
+    return ryle.using(foo).on(foo.result, this.fooResult);
   },
-  //other states
+  
+  fooResult(){
+    //The foo state machine has exited with the 'result' abstract state 
+  }
 });
 ```
-Why must `_start` be a getter rather than just a simple value?  Typically the object passed to `ryle` is anonymous and
-using a getter provides a `this` which points to the definition object.  Why not just use strings? For the same reasons
-described [here](http://millermedeiros.github.io/js-signals/) for the js-signals library.  In essence, and particularly
-for a large state machine, string names can't be checked by your IDE and don't throw an error if they are wrong whereas
-returning real object (and using signals instead of events) _can_ be caught by your IDE and _will_ throw an error if you
-get them wrong.
-### Machine Object
-The _machine object_ is a function which can initiate the state machine.  The object has all the states attached which
-were supplied with the definition.  For example in the above code block `machineObject.initial` will be the state function.
-All of the state functions, and the _machine object_ itself have the following methods:
+More examples using `ryle.abstract()`: [composable machine](#examples-composable)
 
-asd | asd | asd
---- | --- | ---
-dfdf | dfdf | dfdf
+<a name="machine-def"></a>
+## State Machine Definition
 
-  target.onEnter = onEnter;
-  target.onExit = onExit;
-  target.onceActive = onceActive;
-  target.getState = getState;
-  target.using = using;
+<a name="state"></a>
+### State Definition
 
-### Machine Instance
-The instance of the state machine created by the machine object is a promise which resolves when the state machine exits,
-or rejects when an uncaught error is thrown (or uncaught promise rejects).  For state machines which are going to
-complete a common pattern is:
-``` javascript
-machineObject(context).then(
-  function(result){
-    //do something on success!
-  }, function (error){
-    //something has gone wrong!
-  }
-)
-```
-Even for state machines which are not intended to ever complete, it is still advisable to use a `.catch` method to deal
-with errors.
+<a name="create-context"></a>
+### $createContext
 
-In addition to the usual promise methods the instance object has three other members:
-- `.context` which is the context passed to, or generated by, the machine object;
-- `.machine` which is a reference to the machine object; and
-- `.cancel()` which is a method to cause the state machine to make an orderly exit.
-## Defining a State
-### On Entry
-According to the UML definitions a state can have actions performed on entry and on exit and various triggers can cause
-transitions from that state to another.  In _ryle_ a state is defined simply as a function which is executed when the
-state is entered.  What is returned from that function determines all other properties of the state, and in the simplest
-case this is just another state to transition to, for example:
-```
-...
-  state1(context){
-    //do stuff here on entry
-    //then move on straight away
-    return this.state2;
+<a name="start"></a>
+### $start
+
+<a name="superstate"></a>
+### $superstate
+
+<a name="machine"></a>
+## State Machine <code>\<Function></code>
+
+<a name="machine-fn"></a>
+### machine([...various]) ⇒ <code>[Context](#context)</code>
+
+<a name="context"></a>
+## Context <code>\<Promise></code>
+
+<a name="context-exit"></a>
+### context.exit() ⇒ <code>Promise</code>
+
+<a name="transition-collection"></a>
+## Transition Collection
+
+<a name="transition-collection-on-timeout"></a>
+### transitionCollection.onTimeout(...) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+
+<a name="transition-collection-on-exit"></a>
+### transitionCollection.onExit(...) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+
+
+<a name="transition-collection-using"></a>
+### transitionCollection::using(...) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+
+
+<a name="transition-collection-on"></a>
+### transitionCollection::on(...) ⇒ <code>[TransitionCollection](#transition-collection)</code>
+
+
+<a name="custom-triggers"></a>
+### Custom transition triggers
+
+
+<a name="transition-result"></a>
+## Transition Result
+
+
+<a name="action"></a>
+## Action
+
+
+<a name="examples"></a>
+## Examples
+
+<a name="examples-countdown"></a>
+### Countdown
+This state machine counts down a given number of seconds.
+
+**Definition Functions**
+
+|Function|Description|
+|---|---|
+|[$createContext](#create-context) | A standard function.  Is passed the arguments used when the state machine is called and returns a context instance.
+|[$start](#start)| A standard function.  A state which transitions to the starting state.
+|tick| A state function.  Reports the number of seconds remaining and if ticks===0 transition to the done state. After 1 second will transition back to itself and on each exit will reduce the ticks remaining by 1.  
+|done| A state function.  Exits the state machine
+
+**UML diagram**
+
+![Countdown state machine](./examples/countdown.uxf.png)
+
+**examples/countdown.js**
+```js
+const ryle = require('ryle');
+
+const countdown=ryle({
+  $createContext(ticks){
+    return {ticks};
   },
-...
-```
-This is a transitional state.  To define a resting state there needs to be some external event which will trigger a
-transition, and to define that we need to use the `ryle` object:
-```
-...
-  state2(context){
+  
+  $start(){
+    return this.tick
+  },
+
+  tick: function(context){
+    console.log(context.ticks);
     return ryle
-      .on(context.start, this.state3)
-      .onExit(()=>context.hasStarted=true);
+      .on(!context.ticks,this.done)
+      .onTimeout(1000, this.tick)
+      .onExit(function(){--context.ticks});
   },
-...
+
+  done: function(){
+    return ryle.exit();
+  }
+});
 ```
-Here the `ryle` object has a number of chainable methods which are used to define a transition object.  In this case the `.on`
-method is used to cause an event to trigger a transition and the `.onExit` method to define what happens when that state exits.
-This is the transition object.  The third option is only usually used in a hierarchical machine which is not to return anything
-from the state machine.  In this case the machine can only exit this state due to a transition defined elsewhere, for example
-`.cancel` method of the machine instance.
-
-### Transition Object
-A transition object is returned by a state function to define what can cause a state to exit and what will happen when
-it does.  There are three chainable methods of the `ryle` object which generate a transition object, and of those the `.on`
-method has many variants:
-#### `.onTimeout(<delay>, <state>)`
-If, after _delay_ miliseconds nothing else has happened, then the machine will transition to the new _state_.
-#### `.onExit(<function>)`
-When the state does exit the onExit function (or functions if there are several onExit methods) will execute.  An important
-point here is that these are declared in the state function.  If there is a resource which is only needed by a state then
-it does not need to be stored on the `context` as the `.onExit` functions will have access to the state function closure.
-#### `.on(<boolean>, <state> [, <state>])`
-The boolean is evaluated.  If `true` then the first state is transitioned to immediately.  If `false` and if there is a 
-second state then that is transitioned to.
-#### `.on(<promise>, <state> [, <state>])`
-If and when the promise resolves it will transition to the first state with the promise result as the payload.  Similarly
-if the promise rejects and there is a second state then that will be transitioned to with the rejection reason as the
-payload.  If another transition occurs first then the result of the promise will be discarded.  If the promise rejects
-before any other transition *and* there is no second state then _the state machine itself will reject with the error._
-#### `on(<variable_param_list>, <state>)`
-Finally the `.on` method can be used to listen to a custom event type which can be registerred with *Ryle*.  There are
-three of these included:
-- 
-
-### Binding Events
-
-### Hooks
-
-## Hierarchical Machines
-
-## Composable Machines

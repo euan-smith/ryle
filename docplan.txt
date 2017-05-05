@@ -1,0 +1,36 @@
+ryle static properties
+
+ryle(definition) <context>
+
+ryle.on, .onExit, .onTimeout, .using <transition collection>  see tc
+
+ryle.exit <transition result>
+
+ryle.use
+
+---
+context:
+
+Is a promise with .then and .catch
+
+context.exit() <promise>
+
+---
+transition collection
+
+---
+transition result
+
+---
+state machine definition
+
+-state definition
+-spacial methods
+--$createContext
+--$superstate
+--$start
+-
+
+
+
+
