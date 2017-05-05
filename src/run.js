@@ -7,8 +7,13 @@ const {addState, isResult, create:createResult} = require('./transition-result')
 const Promise = require('bluebird');
 const {isState, abstract} = require('./state');
 
+function executeState(machine, state, context, payload){
+  //todo: set trigger defs
+  return state.call(machine, context, payload);
+}
+
 function runFsm(machine, transition, context, trans){
-  let coll = machine.$superState ? machine.$superState(context) : null;
+  let coll = machine.$superState ? executeState(machine, machine.$superState, context) : null;
   if (!isCollection(coll)) coll = createColl();
   //with forced exit, there should always be a transfer object
   coll.addTransfer(trans);
@@ -28,7 +33,7 @@ function runState(machine, transition, context, trans){
     if (isMachine(state)) {
       prom = Promise.resolve(runFsm(state, transition, context, trans));
     } else {
-      const rtn = state.call(machine, context, transition.payload);
+      const rtn = executeState(machine, state, context, transition.payload);
       if (isState(rtn)) prom = Promise.resolve().then(addState(rtn));
       else if (isResult(rtn)) prom = Promise.resolve(rtn);
       else if (isCollection(rtn)) prom = rtn.addTransfer(trans).resolve().then(r=>{rtn.cleanUp(); return r;});
