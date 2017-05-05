@@ -36,11 +36,13 @@ class Machine extends Function{
 const machineProps = {
   _children: prop(()=>new Set()).hidden.constant,
   _descendants: prop(()=>new Set()).hidden.constant,
-  _parent: prop().hidden
+  _parent: prop().hidden,
+  $triggerTypes: prop(()=>[]).hidden
 };
 
 const copyProperty = [
-  "$createContext"
+  "$createContext",
+  "$triggerTypes"
 ];
 
 exports.makeMachine = function(obj, parent, machine){
