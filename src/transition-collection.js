@@ -2,7 +2,6 @@
  * Created by euans on 11/02/2017.
  */
 const Promise = require('bluebird');
-const TransitionResult = require('./transition-result');
 const {hidden} = require('prop-d');
 const {onTimeout, onExit, onPromise, onEvent, onMachine} = require('./transition');
 const {isAbstract} = require('./state');
