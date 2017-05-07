@@ -40,10 +40,19 @@ const machineProps = {
   $triggerTypes: prop(()=>[]).hidden
 };
 
-const copyProperty = [
-  "$createContext",
-  "$triggerTypes"
-];
+function copy(machine, obj, key){
+  machine[key]=obj[key]
+}
+
+function cascade(machine, obj, key){
+  if (!(obj[key] instanceof Array)) throw new TypeError(key+' should be an array');
+  machine[key]=machine[key].concat(obj[key])
+}
+
+const specialProperties = {
+  $createContext:copy,
+  $triggerTypes:cascade
+};
 
 exports.makeMachine = function(obj, parent, machine){
   if (parent != null && !exports.isMachine(parent)) throw new TypeError('second parameter must be undefined or a machine');
@@ -56,12 +65,13 @@ exports.makeMachine = function(obj, parent, machine){
   }
   Object.defineProperties(machine, machineProps);
   machine._parent = parent;
+  if (parent) machine.$triggerTypes = parent.$triggerTypes;
 
   //go through all ennumerable properties of the machine definition
   //Any functions => states, any objects => machines
   for (let k of Object.keys(obj)){
-    if (copyProperty.indexOf(k)!==-1){
-      machine[k]=obj[k];
+    if (specialProperties[k]){
+      specialProperties[k](machine, obj, k);
     }
     //todo: ideally add to a list of own abstract states so that
     //they will not be passed out of an attached machine

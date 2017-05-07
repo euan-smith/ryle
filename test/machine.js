@@ -15,6 +15,7 @@ describe('machine.js', function(){
     expect(()=>makeMachine({},{})).to.throw(TypeError);
     expect(()=>makeMachine(5)).to.throw(TypeError);
     expect(()=>makeMachine({a:5})).to.throw(TypeError);
+    expect(()=>makeMachine({$triggerTypes:{}})).to.throw(TypeError);
   });
   it('has a (default) $createContext method which can be overridden', function(){
     const machine = makeMachine({});

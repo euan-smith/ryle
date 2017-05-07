@@ -11,12 +11,12 @@ const {makeState, abstract} = require('../src/state');
 const {exit, isResult} = require('../src/transition-result');
 const {on, setTriggerDefinitions, using} = require('../src/transition-collection');
 const {create:createAction, isAction} = require('../src/action');
-setTriggerDefinitions([action=> isAction(action) && function (resolve) {
+const actionTrigger = action=> isAction(action) && function (resolve) {
   action.using(resolve);
   return function () {
     action.clear()
   };
-}]);
+};
 
 describe('run.js', function(){
   it('creates a simple state machine', function(){
@@ -37,6 +37,7 @@ describe('run.js', function(){
   });
   it('creates a hierarchical state machine', function(){
     const fsm = makeFSM({
+      $triggerTypes:[actionTrigger],
       $createContext(v){
         return {in:v, out:1, go:createAction()}
       },
@@ -82,6 +83,7 @@ describe('run.js', function(){
   });
   it('can create a composable machine with abstract states',function(){
     const fsm=makeFSM({
+      $triggerTypes:[actionTrigger],
       $createContext(){
         return {a:createAction(), b:createAction()}
       },
@@ -114,6 +116,7 @@ describe('run.js', function(){
     const trigA=createAction();
     const trigB=createAction();
     const fsm=makeFSM({
+      $triggerTypes:[actionTrigger],
       $start(){return this.wait},
       wait(){return on(trigA, this.a).on(trigB, this.b)},
       a:abstract(),
